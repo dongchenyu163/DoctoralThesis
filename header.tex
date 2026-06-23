@@ -62,6 +62,7 @@
 \renewcommand{\baselinestretch}{1.5}
 % \usepackage[draft]{graphicx}
 \usepackage{graphicx}
+\usepackage{subcaption}
 \usepackage{float}
 \usepackage{mathrsfs} 
 \usepackage{amsmath}
@@ -70,6 +71,9 @@
 %\usepackage{mathpazo}
 %\usepackage{txfonts}
 
+% algorithm
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
 \usepackage{tabularx} % For tables with auto-wrapping columns
 % Add because main language is not English
@@ -90,14 +94,56 @@
 \usepackage{multirow}
 \usepackage{listings,jlisting}
 
+
+% %%%%Table
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{makecell}
+
+
 \definecolor{orange}{rgb}{1.0, 0.65, 0.0}
 
 \newcommand{\orange}[1]{\multicolumn{1}{>{\columncolor{orange}}c|}{#1}}
 %%%%%%%%%%%%%%%%%%%%
+
+% \usepackage{subfigure}
+\newcommand{\csubfloat}[2][]{%
+  \makebox[0pt]{\subfloat[#1]{#2}}%
+}
+\newcommand{\centerhfill}[1][\quad]{\hspace{\stretch{0.5}}#1\hspace{\stretch{0.5}}}
 
 % for Table
 \usepackage{booktabs}
 
 \def\MARU#1{{\ooalign{\hfil#1\/\hfil\crcr\raise.167ex\hbox{\mathhexbox20D}}}} 
 \renewcommand{\labelitemi}{�E}
-\newcommand\subcaption[1]{\begin{center}#1\end{center}}
+% \newcommand\subcaption[1]{\begin{center}#1\end{center}}
+
+\newcommand{\namefingerpoint}{指先位置}
+\newcommand{\namefingerforce}{指先力}
+\newcommand{\nameholdingpointset}{把持位置}
+\newcommand{\namesearchspace}{探索空間}
+\newcommand{\namegraspforce}{把持力} % 指先力の集まり
+% \newcommand{\namefingerpoint}{finger position}
+% \newcommand{\namefingerforce}{finger force}
+% \newcommand{\nameholdingpointset}{holding point set}
+% \newcommand{\namesearchspace}{search space}
+% \newcommand{\namegraspforce}{holding force}
+
+% \newcommand{\namegraspforcetitle}{HoldingForce}
+% \newcommand{\namefingerpointcap}{Finger position}
+% \newcommand{\namefingerforcecap}{Finger force}
+% \newcommand{\nameholdingpointsetcap}{Holding point set}
+% \newcommand{\namesearchspacecap}{Search space}
+% \newcommand{\namegraspforcecap}{Holding force} % TODO: 重大问题，原文中有2种解释。。。6*1的合力 以及 3n*1指力列向量;
+
+
+\usepackage{xparse}
+\NewDocumentCommand{\equfingerpoint}{ O{} O{} }{\bm{p}_{\mathrm{#1}#2}}
+\NewDocumentCommand{\equholdingpointset}{ O{} O{} }{{P}_{\mathrm{#1}#2}}  % 把持位置
+\newcommand{\equsearchspace}{\mathbb{P}}
+\NewDocumentCommand{\equfingerforce}{ O{} }{\bm{f}_{\mathrm{f}#1}}
+\NewDocumentCommand{\equgraspforcevector}{ O{} }{\bm{f}_{\mathrm{#1}}}
+\newcommand{\equgraspforce}{\bm{f}}
+\newcommand{\equgraspforcelist}{\mathbb{F}}

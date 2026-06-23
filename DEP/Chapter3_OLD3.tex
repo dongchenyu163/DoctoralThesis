@@ -132,7 +132,7 @@ VS-050においても同様に，手先フランジ中心を基準としたツ�
     \label{fig:robot_camera}
 \end{figure}
 
-取得した点群は，各時刻におけるロボット姿勢とカメラの取り付け関係に基づいて世界座標系へ変換し，合成した3Dモデルとして利用する．
+取得した点群は，各時刻におけるロボット姿勢とカメラの取り付け関係に基づいて世界座標系へ変換し，統合した3Dモデルとして利用する．
 この3Dモデルは，注ぐ動作では容器内部形状の推定と容積計算に，皮むき動作では食材表面形状の取得と工具軌道生成に，切断時把持では接触候補点の生成と把持安定性評価に用いられる．
 
 
@@ -496,7 +496,7 @@ RTC\_PointCloudProcessのポート構成を図\ref{fig:RTCPointCloudProcess}に�
   \label{fig:pipeline}
 \end{figure}
 
-\textbf{点群取得}では，RGB-Dカメラを用いて多視点から撮影した点群を，座標変換により合成し，対象物体の全周的な3次元形状を復元する．
+\textbf{点群取得}では，RGB-Dカメラを用いて多視点から撮影した点群を，座標変換により統合し，対象物体の全周的な3次元形状を復元する．
 この段階では，カメラキャリブレーション，座標系定義，多視点合成が主要な処理となる．
 
 \textbf{点群処理}では，合成された点群に対して，作業領域の切り出し，ダウンサンプリング，作業台平面の除去，外れ値除去，クラスタリング，平滑化および法線ベクトル推定を順次適用し，後段のタスクに適した点群モデルを生成する．
@@ -536,14 +536,20 @@ RGB-Dカメラの単一視点からの撮影では，対象物体の自己遮蔽
 
 \subsubsection{座標系の定義}
 
-本システムでは，以下の座標系を定義する：
+本システムでは，以下の座標系を定義する（図\ref{fig:coordinate_systems}）：
 
 \begin{enumerate}
-  \item \textbf{世界座標系} $\Sigma_W$：ロボットベース座標系を原点とし，全点群の合成先となる基準座標系．
+  \item \textbf{世界座標系} $\Sigma_W$：ロボットベース座標系を原点とし，全点群の統合先となる基準座標系．
   \item \textbf{カメラ座標系} $\Sigma_C$：RGB-Dカメラの光学中心を原点とし，カメラの光学軸を$z$軸とする座標系．
   \item \textbf{ロボット手先座標系} $\Sigma_H$：ロボットアームの手首先端に固定された座標系．
 \end{enumerate}
 
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.65\linewidth]{fig/chp3/pointalgo_coordinates}
+  \caption{座標系の定義}
+  \label{fig:coordinate_systems}
+\end{figure}
 
 カメラ座標系 $\Sigma_C$ で得られた点群は，以下の変換を経て世界座標系 $\Sigma_W$ へ変換される：
 
@@ -570,7 +576,7 @@ RGB-Dカメラの内部パラメータ（焦点距離 $f_x, f_y$，光学中心 
 
 \subsubsection{座標変換と多視点点群の合成}
 
-複数視点からの点群を合成する手順を以下に示す：
+複数視点からの点群を統合する手順を以下に示す：
 
 \begin{enumerate}
   \item ロボットアームを制御し，カメラが対象物体を取り囲むように複数の姿勢へ移動させる．
@@ -579,7 +585,7 @@ RGB-Dカメラの内部パラメータ（焦点距離 $f_x, f_y$，光学中心 
   \begin{equation}
     \mathcal{P}_{W}^{(i)} = \left\{ {}^{W}\bm{T}_{H}^{(i)} \cdot {}^{H}\bm{T}_{C} \cdot \bm{p} \;|\; \bm{p} \in \mathcal{P}_{C}^{(i)} \right\}
   \end{equation}
-  \item 全視点の点群を合成し，1つの点群 $\mathcal{P}_{\mathrm{all}}$ を得る：
+  \item 全視点の点群を統合し，1つの点群 $\mathcal{P}_{\mathrm{all}}$ を得る：
   \begin{equation}
     \mathcal{P}_{\mathrm{all}} = \bigcup_{i=1}^{N_v} \mathcal{P}_{W}^{(i)}
   \end{equation}
@@ -666,8 +672,8 @@ Euclidean Clusteringでは，点間のユークリッド距離が閾値 $d_{\mat
 
 \begin{equation}
   \mathrm{cluster}(\bm{p}_i, \bm{p}_j) = \begin{cases}
-    \text{同じクラスタ} & \text{if } \|\bm{p}_i - \bm{p}_j\| \leq d_{\mathrm{th}} \\
-    \text{異なるクラスタ} & \text{otherwise}
+    \text{同一} & \text{if } \|\bm{p}_i - \bm{p}_j\| \leq d_{\mathrm{th}} \\
+    \text{異なる} & \text{otherwise}
   \end{cases}
 \end{equation}
 
@@ -720,9 +726,9 @@ MLS法では，各点 $\bm{p}_i$ の近傍点群に対して局所的な多項�
 
 前処理を経て得られた点群モデル $\mathcal{P}_{\mathrm{obj}}$ から，後段のタスクを遂行するために以下の基礎情報が抽出される．
 
-\subsubsection{位置姿勢と範囲}
+\subsubsection{位置姿勢と空間領域}
 
-点群モデルのAABBや主成分を計算することにより，世界座標系における物体の位置姿勢や範囲を取得する．この情報は，ロボットアームの到達可能性判定，衝突回避，およびカメラの再撮影時の視点計画に利用される．
+点群モデルのAABBを計算することにより，世界座標系における物体の存在範囲を取得する．この情報は，ロボットアームの到達可能性判定，衝突回避，およびカメラの再撮影時の視点計画に利用される．
 
 \subsubsection{色情報}
 
@@ -739,7 +745,6 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
   \item 物体表面の曲率評価
 \end{enumerate}
 
-% TODO：把第五章的断面面积的计算拿到这里
 \subsubsection{断面と体積計算}
 
 物体の幾何学的特性を定量化するため，点群モデルから断面情報を抽出する．
@@ -789,23 +794,22 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
 上記の基礎情報は，後続する各章において以下のように利用される：
 
 \begin{enumerate}
-  \item \textbf{第4章-食材皮むき}：物体表面の法線ベクトルに基づく皮むき軌道の事前生成，法線角度変化に基づく軌道セグメント化，および皮むきエッジの色情報抽出．
-  \item \textbf{第5章-注ぎ}：容器の断面積データを用いた注いだ量の体積計算，および液面検出のためのAABBによる領域制限．
-  \item \textbf{第6章-食材把持位置探索}：表面点群を把持の探索空間とし，法線ベクトルと重心位置を用いた把持のスコア計算．
+  \item \textbf{第4章-（食材皮むき軌道生成）}：物体表面の法線ベクトルに基づく皮むき軌道の事前生成，法線角度変化に基づく軌道セグメント化，および皮むきエッジの色情報抽出．
+  \item \textbf{第5章-注ぎ}：容器の断面積データを用いた注入量の体積計算，および液面検出のためのAABBによる領域制限．
+  \item \textbf{第6章-（食材把持位置探索）}：表面点群を把持候補空間とし，法線ベクトルと重心位置を用いた把持の力学的スコア計算．
 \end{enumerate}
 
 % ============================================================
-% TODO：通过程序生成
 \section{底面点群の取得}
 % ============================================================
 
 \subsection{本章における位置づけ}
 
-前節で述べた多視点点群合成処理により，対象物体のほぼ全周的な3次元形状が取得される．
+前節で述べた多視点点群統合処理により，対象物体のほぼ全周的な3次元形状が取得される．
 しかし，机上に置かれた物体を上方および側方からスキャンする構成では，底面（作業台との接触面付近）は不可視領域となる．
 本節では，ロボットの把持機能を活用して物体を持ち上げ，底面を含む全周点群を取得する手法について述べる．
 
-\subsection{卓上スキャンにおける不可視領域}
+\subsection{机上スキャンにおける不可視領域}
 
 図\ref{fig:occlusion}に示すように，作業台上に静置された物体をRGB-Dカメラで多視点からスキャンしても，物体底面および作業台との接触部近傍の点群は原理的に取得不可能である．
 この不可視領域は，以下に起因する：
@@ -818,21 +822,20 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.70\linewidth]{fig/chp3/pointalgo_occlusion.png}
-  \caption{卓上における不可視領域}
-
-    \label{fig:occlusion}
+  \includegraphics[width=0.70\linewidth]{fig/chp3/pointalgo_occlusion}
+  \caption{机上スキャンにおける不可視領域}
+  \label{fig:occlusion}
 \end{figure}
 
-% 底面情報の欠落は，特に容器の体積計算精度に重大な影響を及ぼす．
-% 例えば，深くて細い容器では底面付近の形状復元が不完全となるため，式(\ref{eq:volume_integral})の積分下限付近の誤差が累積し，全体の体積誤差が増大する\cite{IROS2019}．
+底面情報の欠落は，特に容器の体積計算精度に重大な影響を及ぼす．
+例えば，深くて細い容器では底面付近の形状復元が不完全となるため，式(\ref{eq:volume_integral})の積分下限付近の誤差が累積し，全体の体積誤差が増大する\cite{IROS2019}．
 
 \subsection{把持を利用した底面点群の取得}
 
-\subsubsection{計算}
+\subsubsection{計算式}
 
 ロボットハンドにより物体を把持して持ち上げた状態で，物体底面をカメラで撮影する．
-このとき，把持後の物体は手先座標系に対して固定されているため，撮影された底面点群は以下の座標変換により世界座標系の既存点群と合成される：
+このとき，把持後の物体は手先座標系に対して固定されているため，撮影された底面点群は以下の座標変換により世界座標系の既存点群と統合される：
 
 \begin{equation}
   \mathcal{P}_{\mathrm{bottom}}^{(W)} = \left\{ {}^{W}\bm{T}_{H}^{(g)} \cdot {}^{H}\bm{T}_{C} \cdot \bm{p} \;|\; \bm{p} \in \mathcal{P}_{\mathrm{bottom}}^{(C)} \right\}
@@ -841,7 +844,7 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
 
 ここで，${}^{W}\bm{T}_{H}^{(g)}$ は底面撮影時のロボット手先の順運動学解，$\mathcal{P}_{\mathrm{bottom}}^{(C)}$ はカメラ座標系における底面点群である．
 
-既存の点群モデル $\mathcal{P}_{\mathrm{obj}}$ と底面点群 $\mathcal{P}_{\mathrm{bottom}}^{(W)}$ の合成は，ICP（Iterative Closest Point）アルゴリズムによる精密位置合わせの後に実施する：
+既存の点群モデル $\mathcal{P}_{\mathrm{obj}}$ と底面点群 $\mathcal{P}_{\mathrm{bottom}}^{(W)}$ の統合は，ICP（Iterative Closest Point）アルゴリズムによる精密位置合わせの後に実施する：
 
 \begin{equation}
   \mathcal{P}_{\mathrm{full}} = \mathcal{P}_{\mathrm{obj}} \cup \mathcal{P}_{\mathrm{bottom}}^{(W, \mathrm{aligned})}
@@ -862,9 +865,9 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
   必要に応じてハンドのリストロール軸を回転させ，複数の底部視点を取得する．
   撮影された各底面点群は，式(\ref{eq:bottom_transform})により世界座標系へ変換する．
 
-  \item \textbf{既存点群との位置合わせと合成}：
+  \item \textbf{既存点群との位置合わせと統合}：
   底面点群と既存の物体点群モデルの重複領域（側面下部）を用いてICPによる精密位置合わせを行う．
-  位置合わせ後，式(\ref{eq:full_model})により両者を合成し，底面を含む完全な物体モデルを生成する．
+  位置合わせ後，式(\ref{eq:full_model})により両者を統合し，底面を含む完全な物体モデルを生成する．
 \end{enumerate}
 
 \section{3D点群モデル取得の精度評価実験}
@@ -872,6 +875,27 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
 \subsection{評価指標}
 
 提案する点群モデル取得手法の精度を定量的に評価するため，以下の評価指標を定義する．
+
+\subsubsection{距離誤差}
+
+実測点群と真値モデル（CADモデルまたは高精度スキャナで取得した参照モデル）の間の点対点距離誤差を評価する．
+真値モデルの各点 $\bm{q}_j$ に対して，点群モデル中の最近傍点 $\bm{p}_{\mathrm{nn}(j)}$ とのユークリッド距離を計算する：
+
+\begin{equation}
+  e_{\mathrm{dist}} = \frac{1}{N_q} \sum_{j=1}^{N_q} \|\bm{q}_j - \bm{p}_{\mathrm{nn}(j)}\|
+  \label{eq:dist_error}
+\end{equation}
+
+ここで，$N_q$ は真値モデルの点数，$\mathrm{nn}(j)$ は $\bm{q}_j$ の最近傍点のインデックスである．
+
+\subsubsection{寸法誤差}
+
+対象物体の主要寸法（幅，奥行き，高さ，直径など）を点群モデルのAABBから計測し，ノギス実測値との差分を寸法誤差として評価する：
+
+\begin{equation}
+  e_{\mathrm{dim}} = |d_{\mathrm{measured}} - d_{\mathrm{GT}}|
+  \label{eq:dim_error}
+\end{equation}
 
 \subsubsection{体積誤差}
 
@@ -891,7 +915,7 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
 
 \subsubsection{ICP誤差}
 
-多視点合成の位置合わせ精度を評価するため，ICPアルゴリズムの収束時の平均二乗誤差（Mean Squared Error; MSE）を記録する：
+多視点統合の位置合わせ精度を評価するため，ICPアルゴリズムの収束時の平均二乗誤差（Mean Squared Error; MSE）を記録する：
 
 \begin{equation}
   e_{\mathrm{ICP}} = \frac{1}{N_{\mathrm{corr}}} \sum_{k=1}^{N_{\mathrm{corr}}} \|\bm{p}_k - \bm{T}_{\mathrm{ICP}} \cdot \bm{q}_k\|^2
@@ -899,6 +923,16 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
 \end{equation}
 
 ここで，$N_{\mathrm{corr}}$ はICPの対応点数，$\bm{T}_{\mathrm{ICP}}$ は推定された変換行列である．
+
+\subsubsection{再現性}
+
+同一条件下で同一物体を複数回撮影・処理し，得られた点群モデル間の一致性を評価する．
+具体的には，試行 $a$ と試行 $b$ の点群モデル間の距離誤差を式(\ref{eq:dist_error})に準じて計算し，複数試行間の平均および標準偏差により再現性を評価する：
+
+\begin{equation}
+  R = \frac{1}{N_{\mathrm{trials}}(N_{\mathrm{trials}}-1)} \sum_{a \neq b} e_{\mathrm{dist}}(\mathcal{P}^{(a)}, \mathcal{P}^{(b)})
+  \label{eq:reproducibility}
+\end{equation}
 
 
 \subsection{標準物体の撮影実験}
@@ -1033,7 +1067,7 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
 \begin{enumerate}
   \item \textbf{ロボットシステムの構成}：双腕ロボット（PA10-7C / DENSO VS-050），力覚センサ，平行グリッパ，RGB-Dカメラからなるハードウェア基盤を構築した．ソフトウェアはOpenRTMベースのRTC統合アーキテクチャを基本とし，第三研究後半ではPythonベースのアーキテクチャへ移行したが，点群処理パイプラインの本質は全研究で同一である．また，三つのタスクそれぞれに最適化されたエンドエフェクタを設計・実装した．
 
-  \item \textbf{点群取得}：RGB-Dカメラを用いた多視点点群撮影，座標系定義（世界・カメラ・手先の3階層），Hand-Eyeキャリブレーションによる外部パラメータ同定，座標変換による多視点点群合成の手順を確立した．これにより，単一視点では不可視となる領域を含む全周的な物体形状の取得が可能となった．
+  \item \textbf{点群取得}：RGB-Dカメラを用いた多視点点群撮影，座標系定義（世界・カメラ・手先の3階層），Hand-Eyeキャリブレーションによる外部パラメータ同定，座標変換による多視点点群統合の手順を確立した．これにより，単一視点では不可視となる領域を含む全周的な物体形状の取得が可能となった．
 
   \item \textbf{点群処理}：作業領域切り出し，Voxel Gridダウンサンプリング，RANSACによる平面除去，Statistical/Radius Outlier Removalによる外れ値除去，Euclidean Clusteringによる対象物抽出，MLS平滑化と法線ベクトル推定からなる標準処理パイプラインを構築した．これにより，ノイズや作業台平面を除外した高品質な物体点群モデルが得られることを確認した．
 
