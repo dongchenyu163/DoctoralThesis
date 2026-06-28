@@ -134,10 +134,10 @@ ConvexHull を用いて計算する．
 	\centering
 	\includegraphics[width=.8\linewidth]{fig/chp_pouring/ParametersV4.pdf}
 	\caption{
-		体積計算の概念図．$V_H$ は計算したい体積，$H$ は液面等の高さを表す．
-		$S_0, S_1, \dots, S_N$ は各スライス面の断面積，$V_1, V_2, \dots, V_N$ は
-		各スライス区間の体積を示す．}
-	\label{fig:ParametersV4}
+		$V_H$ is the volume that we want to calculate.
+		$H$ is the height, and can be set between the bottom of the model and top of the model.
+		To calculate the integration, $S_0, S_1, S_2, \dots, S_N$ are the areas of each cross-sectional plane. $V_1, V_2, V_3, \dots, V_N$ are the volumes of each slice part.}
+	\label{fig:pour_ParametersV4}
 \end{figure}
 % -------------------------------------------------------------------
 
@@ -248,10 +248,10 @@ RANSAC による平面検出を用いれば，液面以外の構造（容器側�
 	\centering
 	\includegraphics[width=0.57\linewidth]{fig/chp_pouring/PourEdgeConvexHull.png}
 	\caption{
-		断面点群の凸包を用いた端点検出の概念図．
-		黒点は断面点群，黒丸は検出すべき端点，オレンジの円で囲まれた点は
-		ConvexHullアルゴリズム（Quickhull）の出力であり，順序付けられた配列として
-		得られる（オレンジ破線）．}
+		Black points are the cross-sectional point set.
+		Black circles mark the endpoints that need to be found.
+		Points surrounded by orange circles are the results of \cite{PCL-Convex}, and these points are stored in an ordered array (marked with an orange broken line).
+	}
 	\label{fig:pour-edge-1}
 \end{figure}
 
@@ -260,10 +260,12 @@ RANSAC による平面検出を用いれば，液面以外の構造（容器側�
 	\centering
 	\includegraphics[width=0.9\linewidth]{fig/chp_pouring/pour-edge-2.png}
 	\caption{
-		端点解析の詳細．青と黒の破線および赤の十字は凸包の結果を示す．
-		緑の破線は解析対象となる点の境界である．濃い青の十字は断面内部の点，
-		シアンの十字は赤い十字が定義する直線上に投影された内部点を表す．
-		深い緑の円で囲まれた2点が最終的に検出された端点である．}
+		This figure shows the point and its neighbor on the convex hull.
+		Blue and black broken lines and red crosses are the results of the convex hull. Black broken lines are not related to the endpoints analysis.
+		The green broken line is the border of points that will be analyzed.
+		Deep blue crosses mark the inner points of the cross-sectional shape.
+		Cyan crosses mark the inner points that will be projected onto the line defined by the two red crosses.
+		Two points surrounded by deep green circles are the resulting endpoints.}
 	\label{fig:pour-edge-2}
 \end{figure}
 % --------------------------------------------------------------------------------
@@ -315,12 +317,12 @@ PCLのEuclideanClusterExtractionを用いてクラスタリングし，
 	\centering
 	\includegraphics[width=0.7\linewidth]{fig/chp_pouring/Pouring.pdf}
 	\caption{
-		注ぐ容器の傾き角度$\theta^{\prime}$における注ぎの様子．
-		$\theta^{\prime}$は液体が流出し始める角度であり，そのとき容器内に残る液体の体積は
-		$V_{\mathrm{valid}}(\theta^{\prime})$（紫の枠内）となる．
-		$h_{\mathrm{valid}}(\theta)$ は注ぐポイント$\mathrm{P}_{\mathrm{pour}}$から
-		容器底面までの高さ，$V_{\mathrm{pour}}$は注がれた体積を表す．}
-	\label{fig:Pouring}
+		This figure depicts the pouring scenario when the angle of the pouring container $\theta$ is $\theta^\prime$.
+		$\theta^\prime$ is the angle at which the liquid pours out from the pouring container, so $V_\mathrm{valid}(\theta^{\prime})$ (purple frame) is the volume that rests in the pouring container.
+		$h_\mathrm{valid}(\theta)$ is defined as the height between the pouring point $\mathrm{P}_\mathrm{pour}$ and the bottom of pouring container.
+		$V_\mathrm{pour}$ is the poured volume.
+	}
+	\label{fig:pour_Pouring}
 \end{figure}
 % ------------------------------------------------------------
 
@@ -548,7 +550,10 @@ $D_{\mathrm{error}}$ は注いだ体積の増加速度（体積誤差の時間�
 	\vspace{3mm}
 	\centering
 	\includegraphics[width=0.8\linewidth]{fig/chp_pouring/Cups-v2.png}
-	\caption{実験に使用した容器群．左から容器1，容器2，容器3．}
+	\caption{Containers used in experiment. Left container is Cup~1, middle is Cup~2, right is Cup~3.  
+    % In the experience at Section~\ref{sec:exp0}, each cups had poured 20 times. In the experience of Method~1, each cups had poured 10 times. In the experience of Method~2, Cup~1 was not used, Cup~2 and Cup~3 were poured 15 times each in Section~\ref{sec:method-2-influence-of-surface-tension-on-method-2}, and 10 times each in Section~\ref{sec:Method2-expAll}.
+    % TODO: Add right section ref
+    }
 	\label{fig:pour_cups}
 \end{figure}
 
@@ -598,28 +603,27 @@ $D_{\mathrm{error}}$ は注いだ体積の増加速度（体積誤差の時間�
 
 % -------------------- IROS2019 Fig. result-VolumeCal --------------------
 \begin{figure}[t]
-	\vspace{3mm}
 	\centering
 	\includegraphics[width=0.8\linewidth]{fig/chp_pouring/VolumeCal.pdf}
-	\caption{容積計算精度の実験結果．横軸は容器の種類，各バイオリンプロットが
-		誤差の分布を表す．白点は中央値，細い黒線は95\%信頼区間，
-		太い線は四分位範囲を示す．}
-	\label{fig:result-VolumeCal}
+	\caption{Results of volume-calculation accuracy. The horizontal axis is type of cup and it also represents the error distribution of each cup. The white dot is the median of errors. The thin black line is the 95\% confidence interval and the thick line is the interquartile range. }
+	\label{fig:pour_result-VolumeCal}
 \end{figure}
 % ------------------------------------------------------------------------
 
-\begin{table}[htbp]
-  \centering
-  \caption{容積計算誤差の平均と標準偏差}
-  \label{tab:pour_vol_cal_error}
-  \begin{tabular}{@{}cccc@{}}
-    \toprule
-    & 容器1 & 容器2 & 容器3 \\
-    \midrule
-    平均誤差 (ml)   & 2.28  & 0.66  & 0.26  \\
-    標準偏差 (ml)   & 3.29  & 2.94  & 1.44  \\
-    \bottomrule
-  \end{tabular}
+\begin{table}[h]
+	\vspace{3mm}
+	\caption{The average (Avg.) and standard deviation (S.d.) of errors in volume calculation}
+	\label{tab:volume-calculation}
+	\centering
+	\begin{tabular}{cccc}
+		\toprule
+		& Cup 1 & Cup 2 & Cup 3 
+		\\ \midrule
+		Avg. (ml)            & 2.28  & 0.66  & 0.26  
+		\\
+		S.d. (ml) 			 & 3.29  & 2.94  & 1.44  
+		\\ \bottomrule
+	\end{tabular}
 \end{table}
 
 \subsubsection{考察}
@@ -661,28 +665,28 @@ RANSACで検出される液面高さが真値より過大評価される傾向�
 \subsubsection{実験結果}
 
 % -------------------- IROS2019 Fig. result-Method1 --------------------
+
 \begin{figure}[t]
 	\vspace{3mm}
 	\centering
 	\includegraphics[width=0.8\linewidth]{fig/chp_pouring/Method1-Error.pdf}
-	\caption{手法1の注ぎ精度．バイオリンプロットは容器ごとの誤差分布を示す．
-		2つのピークは2種類の目標体積に対応する．}
+	\caption{The accuracy of Method 1}
 	\label{fig:pour_result-Method1}
 \end{figure}
 % ---------------------------------------------------------------------
 
 \begin{table}[htbp]
   \centering
-  \caption{手法1 の注ぎ誤差}
+    \caption{The average (Avg.) and standard deviation (S.d.) of errors in  Method~1}
   \label{tab:pour_method1_error}
-  \begin{tabular}{@{}cccc@{}}
-    \toprule
-    & 容器1 & 容器2 & 容器3 \\
-    \midrule
-    平均誤差 (ml)   & 7.35   & -4.43  & -0.95  \\
-    標準偏差 (ml)   & 5.45   & 1.79   & 1.16   \\
-    \bottomrule
-  \end{tabular}
+    \centering
+    \begin{tabular}{cccc}
+        \toprule
+        & Cup 1 & Cup 2 & Cup 3 \\ \midrule
+        Avg. (ml)            & 7.35  & -4.43  & -0.95  \\ 
+        S.d. (ml) 			 & 5.45  & 1.79  & 1.16 
+        \\ \bottomrule
+    \end{tabular}
 \end{table}
 
 \subsubsection{考察}
@@ -736,20 +740,18 @@ $x$ 軸回りに回転させ，各角度における注いだ体積を秤で計�
 	\begin{subfigure}[t]{.45\textwidth}
 		\centering
 		\includegraphics[width=1\textwidth]{fig/chp_pouring/Method2-ST-Cup2-Error.pdf}
-		\caption{容器2における誤差}
-		\label{fig:pour_method-exp1.sub1}
+		\caption{Errors with Cup~2.}
+		\label{fig:method-exp1.sub1}
 	\end{subfigure}
 	\hspace{1cm}
 	\begin{subfigure}[t]{.45\textwidth}
 		\centering
 		\includegraphics[width=1\textwidth]{fig/chp_pouring/Method2-ST-Cup3-Error.pdf}
-		\caption{容器3における誤差}
-		\label{fig:pour_method-exp1.sub2}
+		\caption{Errors with Cup~3}
+		\label{fig:method-exp1.sub2}
 	\end{subfigure}
-	\caption{表面張力が手法2に与える影響．
-		(a) 容器2（初期体積 30, 60, 90\,ml）,
-		(b) 容器3（初期体積 22, 44, 66\,ml）．紫の線は表面張力を弱めた条件の代表例．}
-	\label{fig:pour_method-exp1}
+	\caption{Influence of Surface Tension on Method 2. In Figure \ref{fig:method-exp1.sub1}, the blue, orange, and greeb lines show the results of Cup~2 with initial volumes of 30, 60, and 90\,ml, respectively. Cup~3 is 22, 44, and 66\,ml (Figure \ref{fig:method-exp1.sub2}). The purple line shows the result with no surface tension and Cup~2 with an initial volume of 90\,ml.}
+	\label{fig:method-exp1}
 \end{figure*}
 % ------------------------------------------------------------------------------------
 
@@ -795,27 +797,26 @@ $-5\,\mathrm{ml}$ の範囲に誤差が集中し，注ぎの進行とともに
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=0.9\linewidth]{fig/chp_pouring/Method2-ExpAll-Error.pdf}
-	\caption{手法2の総合的な注ぎ誤差．横軸は目標体積，縦軸は誤差を示す．}
+	\caption{Errors of Method 2}
 	\label{fig:pour_Method2-Cup2-Error}
 \end{figure}
 % ---------------------------------------------------------------------------
 
 表\ref{tab:pour_method2_error}に誤差の平均と標準偏差を示す．
 
-\begin{table}[htbp]
-  \centering
-  \caption{手法2 の注ぎ誤差}
-  \label{tab:pour_method2_error}
-  \begin{tabular}{@{}ccc@{}}
-    \toprule
-    & 容器2 & 容器3 \\
-    \midrule
-    平均誤差 (ml)   & 11.88  & 4.96  \\
-    標準偏差 (ml)   & 4.63   & 2.57  \\
-    \bottomrule
-  \end{tabular}
+\begin{table}[h]
+	\caption{The average (Avg.) and standard deviation (S.d.) of errors in  Method~2}
+	\label{tab:pour_method2_error}
+	\centering
+	\begin{tabular}{ccc}
+		\toprule 
+		& Cup 2 & Cup 3 \\ 
+		\midrule
+		Avg. (ml)		& 11.88  & 4.96  \\ 
+		S.D. (ml)		& 4.63  & 2.57 \\ 
+		\bottomrule
+	\end{tabular}
 \end{table}
-
 \textbf{考察：}
 手法2の総合的な注ぎ精度は，容器2で平均誤差11.88\,ml，標準偏差4.63\,ml，
 容器3で平均誤差4.96\,ml，標準偏差2.57\,mlとなり，手法1に比べて精度が劣ることが明らかとなった．
@@ -832,30 +833,55 @@ $-5\,\mathrm{ml}$ の範囲に誤差が集中し，注ぎの進行とともに
 
 両手法の実験結果をまとめ，以下の比較考察が得られる．
 
-\begin{table}[t]
+% \begin{table}[t]
+%   \centering
+%   \caption{手法1 と 手法2 の比較}
+%   \label{tab:pour_method_comparison}
+%   \begin{tabular}{@{}p{0.28\textwidth}p{0.31\textwidth}p{0.31\textwidth}@{}}
+%     \toprule
+%     比較項目 & 手法1（注ぎ先容器基準） & 手法2（注ぐ容器基準） \\
+%     \midrule
+%     制御方式 & PD制御（注いだ量フィードバック） & P制御（角度追従） \\
+%     \midrule
+%     精度（容器3） & 平均$-0.95\,\mathrm{ml}$ & 平均$4.96\,\mathrm{ml}$ \\
+%     \midrule
+%     主な誤差要因 & 液面検出精度 & 表面張力，容器壁の厚さ・変形 \\
+%     \midrule
+%     必要情報 & 注ぎ先容器内部形状 & 注ぐ容器形状＋初期液体体積 \\
+%     \midrule
+%     利点 & 高精度，注ぐ容器が未知でも可 &
+%     注ぎ先容器の内部観測不要，実行中の液面監視不要 \\
+%     \midrule
+%     欠点 & 注いでいる間の液面観測必須 &
+%     表面張力の影響が大きい，容器の個体差（壁の厚さ・変形）に敏感 \\
+%     \bottomrule
+%   \end{tabular}
+% \end{table}
+\begin{table}[H]
   \centering
-  \caption{手法1 と 手法2 の比較}
+  \caption{Comparison of Method 1 and Method 2}
   \label{tab:pour_method_comparison}
   \begin{tabular}{@{}p{0.28\textwidth}p{0.31\textwidth}p{0.31\textwidth}@{}}
     \toprule
-    比較項目 & 手法1（注ぎ先容器基準） & 手法2（注ぐ容器基準） \\
+    Item & Method 1 (target container based) & Method 2 (pouring container based) \\
     \midrule
-    制御方式 & PD制御（注いだ量フィードバック） & P制御（角度追従） \\
+    Control method & PD control (poured volume feedback) & P control (angle tracking) \\
     \midrule
-    精度（容器3） & 平均$-0.95\,\mathrm{ml}$ & 平均$4.96\,\mathrm{ml}$ \\
+    Accuracy (Cup 3) & Mean $-0.95\,\mathrm{ml}$ & Mean $4.96\,\mathrm{ml}$ \\
     \midrule
-    主な誤差要因 & 液面検出精度 & 表面張力，容器壁の厚さ・変形 \\
+    Main error sources & Liquid level detection accuracy & Surface tension, container wall thickness \& deformation \\
     \midrule
-    必要情報 & 注ぎ先容器内部形状 & 注ぐ容器形状＋初期液体体積 \\
+    Required information & Internal shape of target container & Shape of pouring container and initial liquid volume \\
     \midrule
-    利点 & 高精度，注ぐ容器が未知でも可 &
-    注ぎ先容器の内部観測不要，実行中の液面監視不要 \\
+    Advantages & High accuracy; pouring container can be unknown &
+    No need to observe interior of target container; no real-time liquid level monitoring required \\
     \midrule
-    欠点 & 注いでいる間の液面観測必須 &
-    表面張力の影響が大きい，容器の個体差（壁の厚さ・変形）に敏感 \\
+    Disadvantages & Requires liquid level observation during pouring &
+    Largely affected by surface tension; sensitive to container individual differences (wall thickness, deformation) \\
     \bottomrule
   \end{tabular}
 \end{table}
+
 
 \begin{enumerate}
   \item \textbf{精度：}  

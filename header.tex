@@ -125,18 +125,18 @@
 \newcommand{\nameholdingpointset}{把持位置}
 \newcommand{\namesearchspace}{探索空間}
 \newcommand{\namegraspforce}{把持力} % 指先力の集まり
-% \newcommand{\namefingerpoint}{finger position}
-% \newcommand{\namefingerforce}{finger force}
-% \newcommand{\nameholdingpointset}{holding point set}
-% \newcommand{\namesearchspace}{search space}
-% \newcommand{\namegraspforce}{holding force}
+\newcommand{\namefingerpointENG}{finger position}
+\newcommand{\namefingerforceENG}{finger force}
+\newcommand{\nameholdingpointsetENG}{holding point set}
+\newcommand{\namesearchspaceENG}{search space}
+\newcommand{\namegraspforceENG}{holding force}
 
-% \newcommand{\namegraspforcetitle}{HoldingForce}
-% \newcommand{\namefingerpointcap}{Finger position}
-% \newcommand{\namefingerforcecap}{Finger force}
-% \newcommand{\nameholdingpointsetcap}{Holding point set}
-% \newcommand{\namesearchspacecap}{Search space}
-% \newcommand{\namegraspforcecap}{Holding force} % TODO: 重大问题，原文中有2种解释。。。6*1的合力 以及 3n*1指力列向量;
+\newcommand{\namegraspforcetitleENG}{HoldingForce}
+\newcommand{\namefingerpointcapENG}{Finger position}
+\newcommand{\namefingerforcecapENG}{Finger force}
+\newcommand{\nameholdingpointsetcapENG}{Holding point set}
+\newcommand{\namesearchspacecapENG}{Search space}
+\newcommand{\namegraspforcecapENG}{Holding force} % TODO: 重大问题，原文中有2种解释。。。6*1的合力 以及 3n*1指力列向量;
 
 
 \usepackage{xparse}
@@ -147,3 +147,6 @@
 \NewDocumentCommand{\equgraspforcevector}{ O{} }{\bm{f}_{\mathrm{#1}}}
 \newcommand{\equgraspforce}{\bm{f}}
 \newcommand{\equgraspforcelist}{\mathbb{F}}
+
+\NewDocumentCommand{\fix}{ O{} }{\textcolor{black}{#1}}
+\NewDocumentCommand{\todofix}{ O{} }{\textcolor{black}{#1}}

@@ -36,21 +36,44 @@
 回転の表現には$x$-$y$-$z$軸周りのオイラー角を用い，各回転角度を$\alpha,\beta,\gamma$と表す．プラス回転方向は各回転軸に対して逆時計回りとした．
 
 また，各アームがお互いの動作を妨害せずに共同作業を可能とするため，両アームのベース座標系間の距離を$Y$軸方向に804\,mmとした．
+% Relative base transforms:
+% robot.denso.middle.base -> robot.denso.right.base (XYZABC, ABC in deg, Euler order XYZ):
+%   [0.433713, 0.759744, 0.064421, 1.607230, -0.778746, -92.196446]
+% robot.denso.right.base -> robot.denso.middle.base (XYZABC, ABC in deg, Euler order XYZ):
+%   [0.777336, -0.404764, -0.037188, -0.716564, -1.635894, 92.197139]
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=.8\linewidth]{fig/chp3/ICRA_RobotEnv.png}
-    \caption{ロボットシステムと座標系}
+    \includegraphics[width=0.8\linewidth]{fig/chp3/chp3_old_robot_coordinate.drawio.png}
+    \caption{The coordinate system of PA10-7C.}
+    \label{fig:robot_env}
+\end{figure}
+% \begin{figure}[ht]
+%     \centering
+%     \includegraphics[width=.8\linewidth]{fig/chp3/ICRA_RobotEnv.png}
+%     \caption{The coordinate system of PA10-7C. Right side robot is called [Left Arm]}
+%     \label{fig:robot_env}
+% \end{figure}
+% \begin{figure}[ht]
+%     \centering
+%     \includegraphics[width=.8\linewidth]{fig/chp3/chp3_new_robot_coordinate.drawio.png}
+%     \caption{The coordinate system of DENSO VS-050}
+%     \label{fig:robot_env}
+% \end{figure}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{fig/chp3/chp3_new_robot_coordinate.drawio.png}
+    \caption{The coordinate system of DENSO VS-050}
     \label{fig:robot_env}
 \end{figure}
 
-なお，第三研究（把持）の後半では，PA10-7C二台の故障に伴い，DENSO製VS-050へ変更した．
-VS-050は6軸の垂直多関節ロボットであり，可搬質量4\,kg，位置繰り返し精度$\pm 0.02$\,mmの性能を有する．PA10-7Cと同様に双腕構成で使用し，両アームのベース座標系間の距離は$Y$軸方向に800\,mmとした．ツール座標系の定義や世界座標系の設定はPA10-7Cの場合と同様である．
+なお，第三研究（\ref{ch:holding}章の把持）の後半では，PA10-7C二台の故障に伴い，DENSO製VS-050へ変更した．
+VS-050は6軸の多関節ロボットであり，可搬質量4\,kg，位置繰り返し精度$\pm 0.02$\,mmの性能を有する．PA10-7Cと同様に双腕構成で使用し，双腕のベース座標系間の距離（図\ref{fig:robot_env}の右側のロボットを参照する）は$XY$軸方向にそれぞれ777\,mm -405\,mmとした．ツール座標系の定義や世界座標系（左アームのベース座標系に設定）の設定はPA10-7Cの場合と同様である．
 
 \subsubsection{ツール座標系}
 
 ツール座標系は，ロボットが操作する道具の座標系である．
-道具を目的の位置・姿勢へ誘導する際，ロボットの手先座標系を直接制御するよりも，道具先端に設定した座標系を制御するほうが直感的かつ高精度な動作記述が可能となる．
+道具を目標の位置・姿勢へ誘導する際，ロボットの手先座標系を直接制御するよりも，道具先端に設定した座標系を制御するほうが直感的かつ高精度な動作記述が可能となる．
 
 PA10-7Cでは三菱重工が提供するPAライブラリを用いて手先の位置姿勢を制御する．
 本研究では，ロボット手先にツールを装着した状態で各種作業を実行するため，以下のようにツール座標系を定義した．
@@ -65,7 +88,7 @@ PA10手先座標系の原点は手先フランジの中心に位置し，姿勢�
     \label{fig:tool_coordinate}
 \end{figure}
 
-VS-050においても同様に，手先フランジ中心を基準としたツール座標系を定義し，ツール先端の位置姿勢を制御の基準とした．
+DENSO VS-050においても同様に，手先フランジ中心を基準としたツール座標系を定義し，ツール先端の位置姿勢を制御の基準とした．
 
 
 \subsection{力覚センサ}
@@ -134,6 +157,16 @@ VS-050においても同様に，手先フランジ中心を基準としたツ�
 
 取得した点群は，各時刻におけるロボット姿勢とカメラの取り付け関係に基づいて世界座標系へ変換し，合成した3Dモデルとして利用する．
 この3Dモデルは，注ぐ動作では容器内部形状の推定と容積計算に，皮むき動作では食材表面形状の取得と工具軌道生成に，切断時把持では接触候補点の生成と把持安定性評価に用いられる．
+
+\todofix[
+ただし，第三（把持）研究後半のロボット交換の可動範囲の減少の影響で，カメラの固定は1軸のサーボアーム（図\ref{fig:robot_camera_arm}）を利用し，動けるようになった．
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=.7\linewidth]{fig/chp3/chp3_new_robot_camera_arm.png}
+    \caption{The camera arm for DENSO VS-050. }
+    \label{fig:robot_camera_arm}
+\end{figure}
+]
 
 
 \subsection{エンドエフェクタ設計}
@@ -759,12 +792,12 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
 
 この断面積分法により，容器形状に依存しない汎用的な体積計算が実現される（図\ref{fig:cross_section}）．
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.75\linewidth]{fig/chp3/pointalgo_cross_section}
-  \caption{点群のスライスと断面積計算の概念図}
-  \label{fig:cross_section}
-\end{figure}
+% \begin{figure}[t]
+%   \centering
+%   \includegraphics[width=0.75\linewidth]{fig/chp3/pointalgo_cross_section.png}
+%   \caption{点群のスライスと断面積計算の概念図}
+%   \label{fig:cross_section}
+% \end{figure}
 
 \subsubsection{重心}
 
@@ -905,13 +938,14 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
 
 \subsubsection{実験条件}
 
-幾何学的形状が既知の標準物体を用いて，提案パイプライン全体の精度を評価した．
+幾何学的形状が既知の標準物体である円柱と球を用いて，提案パイプライン全体の各撮影距離における精度を評価した．
+前後左右と上の視点から撮影した点群を合成し，提案パイプラインで処理した後に，点群の点で円柱と球にフィッティングし，
 
 \begin{itemize}
   \item \textbf{使用物体}：
   \begin{enumerate}
-    \item 円柱（直径60\,mm，高さ100\,mm，容積約283\,ml）
-    \item 球体（直径80\,mm）
+    \item 円柱（直径44.8\,mm，高さ60\,mmの3Dプリンタで作成した円柱）：直径と面の中心を推測し，
+    \item 球体（直径57.25\,mmのビリヤードボール）
   \end{enumerate}
   \item \textbf{真値}：CADモデル（寸法）および実測値（体積は水充填法により計測）
   \item \textbf{撮影視点数}：6視点（物体を取り囲むように60°間隔で配置）
@@ -956,12 +990,12 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
   \item \textbf{試行回数}：5回
 \end{itemize}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.60\linewidth]{fig/chp3/pointalgo_3dprinted}
-  \caption{3Dプリンタ製自由曲面物体}
-  \label{fig:3dprinted}
-\end{figure}
+% \begin{figure}[t]
+%   \centering
+%   \includegraphics[width=0.60\linewidth]{fig/chp3/pointalgo_3dprinted}
+%   \caption{3Dプリンタ製自由曲面物体}
+%   \label{fig:3dprinted}
+% \end{figure}
 
 \subsubsection{結果と考察}
 

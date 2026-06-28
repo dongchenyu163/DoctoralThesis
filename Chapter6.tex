@@ -41,27 +41,30 @@
 
 本手法で用いる記号の一覧を表\ref{tab:holding_symbol}にまとめる．
 
-\begin{table}[ht]
-\caption{本章で使用する符号}
+\begin{table}[t]
+\caption{List of Symbols}
 \centering
-\label{tab:holding_symbol}
+\label{table:symbol}
 \begin{tabular}[t]{lll}
 \hline
-記号 & 名称 & 説明 \\ \hline
-$n$ & 指の本数 & 接触点数 \\
-$\equfingerpoint[][i]$ & {\namefingerpoint} & $i$番目の接触点の$xyz$座標 \\
-$\equholdingpointset$ & {\nameholdingpointset} & $n$個の接触点$\equfingerpoint[][i]$の集合 \\
-$\equsearchspace$ & {\namesearchspace} & {\nameholdingpointset}$\equholdingpointset$の集合 \\
-$\bm{t}_{\mathrm{k}}$ & 力とトルク & 包丁が食材に与える6次元の力およびモーメント \\
-$\equfingerforce[i]$ & {\namefingerforce} & $i$番目の指先が発生する3次元力ベクトル \\
-$\equgraspforcevector$ & {\namegraspforce} & $n$本の{\namefingerforce}を縦に並べた$3n$次元ベクトル \\
-$\Omega$ & 食材表面 & 食材の表面形状 \\
-$\Omega_{\mathrm{c1,2}}$ & 切断接触面 & 包丁と食材の接触面（図\ref{fig:holding_method}右部） \\
-$\Omega_{\mathrm{g}}$ & 把持の部分 & 食材表面のうち把持に用いる部分 \\
+Symbol & Name & Description \\ \hline
+$n$ & Number of fingers & Number of contact points\\
+$\equfingerpoint[][i]$ & {\namefingerpointcapENG} & $xyz$ coordinates of the $i$-th contact point\\
+$\equholdingpointset$ & {\nameholdingpointsetcapENG} & Set of $n$ contact points $\equfingerpoint$ \\
+$\equsearchspace$ & {\namesearchspacecapENG} & Set of {\nameholdingpointsetENG}s $\equholdingpointset$ \\
+$\bm{t}_\mathrm{k}$ & knife wrench & 6-D force and torque applied to the food \\
+$\equfingerforce[i]$ & Finger tip force & 3-D Force vector of the $i$-th finger tip \\
+$\equgraspforcevector$ & {\namegraspforcecapENG} & \begin{tabular}[c]{@{}l@{}}Vector of tip forces of $n$ fingers arranged\\  as a column, a $3n$-D vector\end{tabular} \\
+$\Omega$ & & The surface shape of the food \\
+$\Omega_{\mathrm{c1,2}}$ & & Contact surfaces (right part in Fig.\ref{fig:method}) \\
+% $\Omega_{\mathrm{g}}$ & & The surface part of the food used for holding 
+$\Omega_{\mathrm{g}}$ & & 
+\begin{tabular}[c]{@{}l@{}}The surface part of the food used for\\  holding\end{tabular}
+
+\\
 \hline
 \end{tabular}
 \end{table}
-
 
 % ------------------------------------------------------------
 \section{分析：包丁外力下における把持安定性の力学的評価}
@@ -79,47 +82,56 @@ $\Omega_{\mathrm{g}}$ & 把持の部分 & 食材表面のうち把持に用い�
 
 全時刻の走査が完了した後，$\mathbb{S}$において最大値をとる{\nameholdingpointset}$\equholdingpointset[fin]$を最終出力とする．
 
+
+
 \begin{algorithm}[H]
-\caption{提案手法の全体アルゴリズム}
-\label{algo:holding_global}
+\caption{Full progress}\label{algo:holding_global}
+
 \begin{algorithmic}[1]
 \setlength{\baselineskip}{11pt}
-\State $N$: $\equsearchspace$ の要素数
-\State $\Omega$: 食材の表面形状
-\State $\mathbb{T}$: 包丁の軌道，姿勢$T$と速度$\bm{v}$の系列
-\State $\mathbb{S}$: {\nameholdingpointset}$\equholdingpointset$の最終評価スコアを格納する辞書（全スコアを0で初期化）
-\State $\equsearchspace_{\mathrm{all}}$: $\Omega$から得られる全{\nameholdingpointset}$\equholdingpointset$
+\State $N$: the number of elements in $\mathbb{P}$
+\State $\Omega$: A surface of food.
+\State $\mathbb{T}$: Trajectory of knife, a sequence of pose $T$ and velocity $\bm v$
+\State $\mathbb{S}$: Map for final evaluation score of a {\nameholdingpointsetENG} $P$. All scores initialize with 0.
+% %% TAG: R1C1 ORG
+% \State $\mathbb{P}_\mathrm{all}$: All possible {\nameholdingpointset} $P$ from $\Omega_{\mathrm{g}}$.
+% %% TAG: R1C1
+\State $\mathbb{P}_\mathrm{all}$: All possible {\nameholdingpointsetENG} $P$ from \fix[$\Omega$].
 
 \State
-\For{\textbf{all} $(T, \bm{v}) \in \mathbb{T}$}
-    \State $\Omega_{\mathrm{c1}}, \Omega_{\mathrm{c2}}, \Omega_{\mathrm{g}}, \equsearchspace_{\mathrm{init}} \gets \Call{PrepareData}{\Omega, T}$
-    \State $\equsearchspace \gets \Call{FilterByGeoScore}{\equsearchspace_{\mathrm{init}}, T}$
+\For{\textbf{all} $(T, \bm v) \in \mathbb{T}$}  \label{algoline:global-knifepose-for-st}
 
-    \For{$\equholdingpointset \in (\equsearchspace_{\mathrm{all}} \setminus \equsearchspace)$}
+    \State $\Omega_{\mathrm{c1}}, \Omega_{\mathrm{c2}}, \Omega_{\mathrm{g}}, \equsearchspace_\mathrm{init} \gets $\Call {PrepareData}{$\Omega$, $T$}  \label{algoline:exp1-st}    \label{algoline:global-PrepareData}
+    \State $\equsearchspace \gets $\Call {FilterByGeoScore}{$\equsearchspace_\mathrm{init}$, $T$}
+
+    \For{$P \in (\mathbb{P}_\mathrm{all} \setminus \equsearchspace)$  }  \label{algoline:global-set-inf-score-st}
         \State $\mathbb{S}[\equholdingpointset] \gets -\infty$
-    \EndFor
+    \EndFor  \label{algoline:global-set-inf-score-ed}
+  
+    \State $\{S_\mathrm{pos, i}\} \gets$ \Call {CalPositionalScore}{$\equsearchspace$, $T$} 
 
-    \State $\{S_{\mathrm{pos}, i}\} \gets \Call{CalPositionalScore}{\equsearchspace, T}$
+    \State $\bm{t}_\mathrm{k} \gets $\Call {CalKnifeForce}{$\Omega_{\mathrm{c1}}$, $\Omega_{\mathrm{c2}}$, $T$, $\bm v$}  \label{algoline:global-CalKnifeForce} \label{algoline:global-filter-force-st}
 
-    \State $\bm{t}_{\mathrm{k}} \gets \Call{CalKnifeForce}{\Omega_{\mathrm{c1}}, \Omega_{\mathrm{c2}}, T, \bm{v}}$
+    \State $\{S_\mathrm{force, i}\} \gets$ \Call {CalDynamicScore}{$\bm{t}_\mathrm{k}, \equsearchspace $, $\Omega_{\mathrm{g}}$} \label{algoline:global-caldynamicscore}
+  
+    \For{$i\gets 1, N$} \label{algoline:global-accumulate-forcescore-st}
+        \State $ \mathbb{S}[\equholdingpointset[][i]] \gets \mathbb{S}[\equholdingpointset[][i]] + S_{\mathrm{pos}, i} + S_{\mathrm{force}, i}$
+    \EndFor \label{algoline:global-point-for-ed} \label{algoline:global-filter-force-ed}  \label{algoline:global-accumulate-forcescore-ed}
+  
+\EndFor  \label{algoline:global-knifepose-for-ed}
 
-    \State $\{S_{\mathrm{dyn}, i}\} \gets \Call{CalDynamicScore}{\bm{t}_{\mathrm{k}}, \equsearchspace, \Omega_{\mathrm{g}}}$
+\State $\equholdingpointset[fin] \gets P$ such that the value $\mathbb{S}[\equholdingpointset]$ is the maximum.
 
-    \For{$i \gets 1, N$}
-        \State $\mathbb{S}[\equholdingpointset[][i]] \gets \mathbb{S}[\equholdingpointset[][i]] + S_{\mathrm{pos}, i} + S_{\mathrm{dyn}, i}$
-    \EndFor
-\EndFor
-
-\State $\equholdingpointset[fin] \gets \equholdingpointset$ such that the value $\mathbb{S}[\equholdingpointset]$ is the maximum.
 \end{algorithmic}
 \end{algorithm}
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=1\linewidth]{fig/chp_holding/SICE2025_AlgoFlow.pdf}
-    \caption{提案手法のブロック図．食材表面，包丁メッシュ，軌道$\mathbb{T}$を入力とし，軌道ループ（黄色領域）内で{\namesearchspace}の初期化・幾何フィルタによる絞り込みを経て，残った候補$\equsearchspace$（青色領域）に対し位置評価スコア（緑色ブロック）と動的評価スコア（橙色ブロック）を計算する．最終的に正規化されたスコアを$\mathbb{S}$に累積し，最適な{\nameholdingpointset}を出力する．}
+    \caption{ Block diagram of the proposed searching method for the optimal {\nameholdingpointsetENG}. The process takes the food surface, knife mesh, and trajectory $\mathbb{T}$ as inputs. Inside the trajectory loop (yellow area), the search space is initialized and refined via a Geometric Filter. The remaining candidates in $\equsearchspace$ (blue area) are evaluated using Positional Scores (green block) and Dynamic Scores (orange block); the latter selects the best dynamic score of balanced {\namegraspforceENG} $\equgraspforce$ that can resist the knife wrench $\bm{t}_\mathrm{k}$. Finally, the normalized scores are accumulated in $\mathbb{S}$ to identify the final output. }
     \label{fig:holding_Algo1}
 \end{figure}
+
 
 
 \subsection{幾何フィルタによる{\namesearchspace}の削減}
@@ -159,41 +171,41 @@ E_{\mathrm{tbl}} = \min(p_{1z},\ldots,p_{nz})
 本実験では出力比率$r=0.6$とした．なお，本フィルタでは指先が食材に接触した状態における拘束のみを考慮し，非接触状態から接触に至る指先の移動経路における衝突については考量しない．
 
 \begin{algorithm}[H]
-\caption{幾何フィルタによる{\namesearchspace}の削減}
+\caption{Reduce the search space}
 \label{algo:holding_filter_geo}
 \begin{algorithmic}[1]
   \setlength{\baselineskip}{11pt}
-  \Function{FilterByGeoScore}{$\equsearchspace$, $T$}
-  \State $N$: $\equsearchspace$ の要素数
-  \State $\equholdingpointset[][1],\ldots,\equholdingpointset[][N]$: $\equsearchspace$ の各要素
-  \State $w_{\mathrm{fin}}, w_{\mathrm{knf}}, w_{\mathrm{tbl}}$: 重み
-  \State $\mathbb{S}_{\mathrm{geo}}$: 幾何スコアを格納するローカル辞書（空で初期化）
-  \State $r$: 出力比率（$r\in(0, 1]$）
-  \For{$i \gets 1, N$}
-    \State $E_{\mathrm{fin}, i} \gets \equholdingpointset[][i]$に対する$E_{\mathrm{fin}}$
-    \State $E_{\mathrm{knf}, i} \gets \equholdingpointset[][i]$に対する$E_{\mathrm{knf}}$
-    \State $E_{\mathrm{tbl}, i} \gets \equholdingpointset[][i]$に対する$E_{\mathrm{tbl}}$
+  \Function{FilterByGeoScore}{$\mathbb{P}$, $T$}
+  \State $N$: the number of elements in $\mathbb{P}$
+  \State $P_1,\ldots,P_N$: each element of $\mathbb{P}$
+  \State $w_\mathrm{fin}, w_\mathrm{knf}, w_\mathrm{tbl}$: weights
+  \State \fix[$\mathbb{S}_\mathrm{geo}$: Local map for geometric scores, initialized empty]
+  \State $r$: output ratio ($r\in(0, 1]$)
+  \For{$i\gets 1, N$}
+    \State $E_{\mathrm{fin}, i}\gets E_\mathrm{fin}$ for $P_i$
+    \State $E_{\mathrm{knf}, i}\gets E_\mathrm{knf}$ for $P_i$
+    \State $E_{\mathrm{tbl}, i}\gets E_\mathrm{tbl}$ for $P_i$
   \EndFor
-  \State $\{E_{\mathrm{fin,}i}\} \gets \Call{Normalize}{\{E_{\mathrm{fin,}i}\}}$
-  \State $\{E_{\mathrm{knf,}i}\} \gets \Call{Normalize}{\{E_{\mathrm{knf,}i}\}}$
-  \State $\{E_{\mathrm{tbl,}i}\} \gets \Call{Normalize}{\{E_{\mathrm{tbl,}i}\}}$
-  \For{$i \gets 1, N$}
-    \State $S_{\mathrm{geo}} \gets w_{\mathrm{fin}} E_{\mathrm{fin,}i} + w_{\mathrm{knf}} E_{\mathrm{knf,}i} + w_{\mathrm{tbl}} E_{\mathrm{tbl,}i}$
-    \State $\mathbb{S}_{\mathrm{geo}}[\equholdingpointset[][i]] \gets S_{\mathrm{geo}}$
+  \State $\{E_{\mathrm{fin,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{fin,}i}\}$}
+  \State $\{E_{\mathrm{knf,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{knf,}i}\}$}
+  \State $\{E_{\mathrm{tbl,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{tbl,}i}\}$}
+  \For{$i\gets 1, N$}
+    \State $S_\mathrm{geo}\gets w_\mathrm{fin} E_{\mathrm{fin,}i} + w_\mathrm{knf} E_{\mathrm{knf,}i} + w_\mathrm{tbl} E_{\mathrm{tbl,}i}$ 
+    \State \fix[$\mathbb{S}_\mathrm{geo}[P_i] \gets S_\mathrm{geo}$]
   \EndFor
-  \State $\mathbb{S}_{\mathrm{geo}}$を値の降順にソート
-  \State $\equsearchspace_{\mathrm{out}} \gets$ 上位$\lfloor rN\rfloor$件のキー
-  \State \textbf{return} $\equsearchspace_{\mathrm{out}}$
+  \State \fix[Sort $\mathbb{S}_\mathrm{geo}$ by values in descending order]
+  \State \fix[$\mathbb{P}_\mathrm{out} \gets$ keys of the top $\lfloor rN\rfloor$ entries in $\mathbb{S}_\mathrm{geo}$]
+  \State \fix[\textbf{return} $\mathbb{P}_\mathrm{out}$]
 \EndFunction\\
-\Function{Normalize}{$\{E_i\}$}
-\State $N$: $\{E_i\}$の要素数
-\State $M \gets \max(E_1,\ldots,E_N)$
-\State $m \gets \min(E_1,\ldots,E_N)$
-\ForAll{$E \in \{E_i\}$}
- \State $E \gets (E - m) / (M - m)$
+\Function{Normalize}{$\{E_i\}$}  \label{algoline:normalize-func}
+\State $N$: the number of elements in $\{E_i\}$
+\State $M\gets\max(E_1,\ldots,E_N)$
+\State $m\gets\min(E_1,\ldots,E_N)$
+\ForAll{$E\in\{E_i\}$}
+ \State $E\gets (E - m) / (M - m)$
 \EndFor
 \State \textbf{return} $\{E_i\}$
-\EndFunction
+\EndFunction  \label{algoline:normalize-func-ed}
 \end{algorithmic}
 \end{algorithm}
 
@@ -224,23 +236,24 @@ E_{\mathrm{pdis}} = -\min(\mathrm{Dist}(\equholdingpointset, \hat{\bm{n}}_{\math
 \end{equation}
 
 \begin{algorithm}[H]
-\caption{位置評価スコアの計算}
+\caption{Calculate the positional score}
 \label{algo:holding_score_pos}
 \begin{algorithmic}[1]
 \setlength{\baselineskip}{11pt}
-\Function{CalPositionalScore}{$\equsearchspace$, $T$}
-    \State $N$: $\equsearchspace$ の要素数
-    \State $\equholdingpointset[][1],\ldots,\equholdingpointset[][N]$: $\equsearchspace$ の各要素
-    \State $w_{\mathrm{pdir}}, w_{\mathrm{pdis}}$: 重み
-    \For{$i \gets 1, N$}
-        \State $E_{\mathrm{pdir,}i} \gets \equholdingpointset[][i]$に対する$E_{\mathrm{pdir}}$
-        \State $E_{\mathrm{pdis,}i} \gets \equholdingpointset[][i]$に対する$E_{\mathrm{pdis}}$
+\Function{CalPositionalScore}{$\mathbb{P}$, $T$}
+    \State $N$: the number of elements in $\mathbb{P}$
+    \State $P_1,\ldots,P_N$: each element of $\mathbb{P}$
+    \State $w_\mathrm{pdir}, w_\mathrm{pdis}$: weights
+    \For{$i\gets 1, N$}
+        \State $E_{\mathrm{pdir,}i}\gets E_\mathrm{pdir}$ for $P_i$
+        \State $E_{\mathrm{pdis,}i}\gets E_\mathrm{pdis}$ for $P_i$ \label{algoline:CalDynamicScore-pos-score}
     \EndFor
-    \State $\{E_{\mathrm{pdir,}i}\} \gets \Call{Normalize}{\{E_{\mathrm{pdir,}i}\}}$
-    \State $\{E_{\mathrm{pdis,}i}\} \gets \Call{Normalize}{\{E_{\mathrm{pdis,}i}\}}$
-    \For{$i \gets 1, N$}
-        \State $S_{\mathrm{pos},i} \gets w_{\mathrm{pdir}} E_{\mathrm{pdir},i} + w_{\mathrm{pdis}} E_{\mathrm{pdis},i}$
-    \EndFor
+    \State $\{E_{\mathrm{pdir,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{pdir,}i}\}$} \label{algoline:score-pos-final-st}
+    \State $\{E_{\mathrm{pdis,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{pdis,}i}\}$}
+    \For{$i\gets 1, N$}
+        \State $S_{\mathrm{pos},i} \gets w_\mathrm{pdir} E_{\mathrm{pdir},i} + w_\mathrm{pdis} E_{\mathrm{pdis},i}$
+    \EndFor  \label{algoline:score-pos-final-ed}
+
     \State \Return $\{S_{\mathrm{pos},i}\}$
 \EndFunction
 \end{algorithmic}
@@ -256,7 +269,7 @@ E_{\mathrm{pdis}} = -\min(\mathrm{Dist}(\equholdingpointset, \hat{\bm{n}}_{\math
 \begin{figure*}[ht]
     \centering
     \includegraphics{fig/chp_holding/SICE2025-Method-fig1.pdf}
-    \caption{左：刃曲線上での微小要素$du$に生じる切断力の計算（緑色の文字と線）．右：包丁により生じる二つの接触面（$\Omega_{\mathrm{c_1}}$と$\Omega_{\mathrm{c_2}}$）と，探索に用いる食材の片側（赤色曲線）．}
+    \caption{Left: The zoomed-in part shows the calculation of the fracture force due to an infinitesimal element $du$ (in green text and line). Right: The crack generated by the knife creates two contact faces ($\Omega_\mathrm{c_{1}}$ and $\Omega_\mathrm{c_{2}}$). Also, searching only uses one side (the red curve) of the food model.}
     \label{fig:holding_method}
 \end{figure*}
 
@@ -371,55 +384,56 @@ S_{\mathrm{dyn},i} = w_{\mathrm{mag}} \tilde{E}_{\mathrm{mag,}i} + w_{\mathrm{di
 本実験では，重みを$w_{\mathrm{dir}}=2,\ w_{\mathrm{mag}}=2,\ w_{\mathrm{var}}=1$と設定した．
 
 \begin{algorithm}[H]
-\caption{動的評価スコアの計算}
+\caption{Algo of the holding score calculation}
 \label{algo:holding_filter_force}
 \begin{algorithmic}[1]
 \setlength{\baselineskip}{11pt}
-\Function{CalDynamicScore}{$\bm{t}_{\mathrm{k}}$, $\equsearchspace$, $\Omega_{\mathrm{g}}$}
-    \State $E_{\mathrm{mag,}i}, E_{\mathrm{dir,}i}, E_{\mathrm{var,}i}$: {\nameholdingpointset}の動的スコアの各成分
+\Function{CalDynamicScore}{$\bm{t}_\mathrm{k}$, $\equsearchspace$, $\Omega_{\mathrm{g}}$}
+    \State $E_{\mathrm{mag,}i} , E_{\mathrm{dir,}i} , E_{\mathrm{var,}i}$: The each part of dynamic score for a $P$
 
-    \For{$i \gets 1, N$}
-        \State $E_{\mathrm{mag,}i}, E_{\mathrm{dir,}i}, E_{\mathrm{var,}i}$
-        \State $\quad \gets \Call{CalDynamicScoreEach}{\bm{t}_{\mathrm{k}}, \equholdingpointset[][i], \Omega_{\mathrm{g}}}$
+    \For {$i\gets 1, N$}
+        \State \fix[$E_{\mathrm{mag,}i} , E_{\mathrm{dir,}i} , E_{\mathrm{var,}i}$ ]
+        \State $\quad \gets$ \Call {CalDynamicScoreEach}{$\bm{t}_\mathrm{k}, \equholdingpointset[i] $, $\Omega_{\mathrm{g}}$}
     \EndFor
-
-    \State $\{\tilde{E}_{\mathrm{mag,}i}\} \gets \Call{Normalize}{\{E_{\mathrm{mag,}i}\}}$
-    \State $\{\tilde{E}_{\mathrm{dir,}i}\} \gets \Call{Normalize}{\{E_{\mathrm{dir,}i}\}}$
-    \State $\{\tilde{E}_{\mathrm{var,}i}\} \gets \Call{Normalize}{\{E_{\mathrm{var,}i}\}}$
-
-    \For{$i \gets 1, N$}
-        \State $S_{\mathrm{dyn},i} \gets w_{\mathrm{mag}} \tilde{E}_{\mathrm{mag,}i} + w_{\mathrm{dir}} \tilde{E}_{\mathrm{dir,}i} + w_{\mathrm{var}} \tilde{E}_{\mathrm{var,}i}$
+    
+    \State \fix[$\{\tilde{E}_{\mathrm{mag,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{mag,}i}\}$} \label{algo:force-global-norm-score-st} ]
+    \State \fix[$\{\tilde{E}_{\mathrm{dir,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{dir,}i}\}$}]
+    \State \fix[$\{\tilde{E}_{\mathrm{var,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{var,}i}\}$}] \label{algo:force-global-norm-score-ed}
+    
+    \For{$i\gets 1, N$}
+        \State \fix[$S_{\mathrm{dyn},i} \gets w_\mathrm{mag} \tilde{E}_{\mathrm{mag,}i} + w_\mathrm{dir} \tilde{E}_{\mathrm{dir,}i} + w_\mathrm{var} \tilde{E}_{\mathrm{var,}i}$ ]
     \EndFor
-
-    \State \Return $\{S_{\mathrm{dyn,}i}\}$
+    
+    \State \fix[\Return $\{S_{\mathrm{dyn,}i}\}$ \label{algoline:CalDynamicScore-all}]
 \EndFunction
 
-\State
+\State 
 
-\Function{CalDynamicScoreEach}{$\bm{t}_{\mathrm{k}}$, $\equholdingpointset$, $\Omega_{\mathrm{g}}$}
-    \State $e_{\mathrm{mag}}, e_{\mathrm{dir}}, e_{\mathrm{var}}$: 生成された{\namegraspforce}$\equgraspforce$のローカル動的スコア
-    \State $L$: 空のリスト
-    \State $Q$: 生成する{\namegraspforce}の数
-    \State $\equgraspforcelist \gets \Call{GenerateHoldingForce}{\bm{t}_{\mathrm{k}}, \equholdingpointset}$
-    \State $\equgraspforcelist = [\equgraspforcevector[1], \equgraspforcevector[2], \dots, \equgraspforcevector[Q]]$
+\Function{CalDynamicScoreEach}{$\bm{t}_\mathrm{k}$, $\equholdingpointset$, $\Omega_{\mathrm{g}}$}
+    \State \fix[$e_\mathrm{mag},e_\mathrm{dir},e_\mathrm{var}$: Local dynamic score of a generated {\namegraspforceENG}.]
+    \State $L$: an empty list
+    \State $\fix[Q]$: the number of \fix[\namegraspforceENG] to generate
+    \State $[\equgraspforce_\mathrm{1}, \equgraspforce_\mathrm{2}, \dots \equgraspforce_{\fix[Q]}]\gets $\Call {\fix[Generate\namegraspforcetitleENG]}{$\bm{t}_\mathrm{k}, \equholdingpointset$}  
+    \label{algoline:holding_CalDynamicScore-GenerateFingerForce-1} \label{algoline:holding_CalDynamicScore-GenerateFingerForce-2} \label{algoline:holding_exp1-ed}
+    
+    \For{$i\gets 1, \fix[Q]$}
+        \State \fix[$e_{\mathrm{mag,}i}\gets $ Calculate $e_{\mathrm{mag}}$ given $\bm{t}_\mathrm{k}, P, \bm{f}_i$ \label{algoline:holding_CalDynamicScore-force-score-st}]
+        \State \fix[$e_{\mathrm{dir,}i}\gets $ Calculate $e_{\mathrm{dir}}$ given $\bm{t}_\mathrm{k}, P, \bm{f}_i$ ]
+        \State \fix[$e_{\mathrm{var,}i}\gets $ Calculate $e_{\mathrm{var}}$ given $\bm{t}_\mathrm{k}, P, \bm{f}_i$ \label{algoline:holding_CalDynamicScore-force-score-ed}]
+    \EndFor \label{algoline:holding_CalDynamicScore-force-score-loop-ed}
 
-    \For{$i \gets 1, Q$}
-        \State $e_{\mathrm{mag,}i} \gets \bm{t}_{\mathrm{k}}, \equholdingpointset, \equgraspforcevector[i]$に対する$e_{\mathrm{mag}}$の計算
-        \State $e_{\mathrm{dir,}i} \gets \bm{t}_{\mathrm{k}}, \equholdingpointset, \equgraspforcevector[i]$に対する$e_{\mathrm{dir}}$の計算
-        \State $e_{\mathrm{var,}i} \gets \bm{t}_{\mathrm{k}}, \equholdingpointset, \equgraspforcevector[i]$に対する$e_{\mathrm{var}}$の計算
+    \State \fix[$\{\tilde{e}_{\mathrm{mag,}i}\}\gets$ \Call{Normalize}{$\{e_{\mathrm{mag,}i}\}$} \label{algo:holding_force-local-norm-score-st}]
+    \State \fix[$\{\tilde{e}_{\mathrm{dir,}i}\}\gets$ \Call{Normalize}{$\{e_{\mathrm{dir,}i}\}$}]
+    \State \fix[$\{\tilde{e}_{\mathrm{var,}i}\}\gets$ \Call{Normalize}{$\{e_{\mathrm{var,}i}\}$} \label{algo:holding_force-local-norm-score-ed}]
+
+    \For{$i\gets 1, M$} \label{algoline:holding_CalDynamicScoreEach-finalscore-st}
+        \State \fix[$S_{\mathrm{}}\gets w_\mathrm{mag} \tilde{e}_{\mathrm{mag,}i} + w_\mathrm{dir} \tilde{e}_{\mathrm{dir,}i} + w_\mathrm{var} \tilde{e}_{\mathrm{var,}i}$ ]
+        \State \fix[Append $\{S, \{e_{\mathrm{mag,}i},e_{\mathrm{dir,}i},e_{\mathrm{var,}i}\}\}$ to $L$]
     \EndFor
 
-    \State $\{\tilde{e}_{\mathrm{mag,}i}\} \gets \Call{Normalize}{\{e_{\mathrm{mag,}i}\}}$
-    \State $\{\tilde{e}_{\mathrm{dir,}i}\} \gets \Call{Normalize}{\{e_{\mathrm{dir,}i}\}}$
-    \State $\{\tilde{e}_{\mathrm{var,}i}\} \gets \Call{Normalize}{\{e_{\mathrm{var,}i}\}}$
-
-    \For{$i \gets 1, Q$}
-        \State $S \gets w_{\mathrm{mag}} \tilde{e}_{\mathrm{mag,}i} + w_{\mathrm{dir}} \tilde{e}_{\mathrm{dir,}i} + w_{\mathrm{var}} \tilde{e}_{\mathrm{var,}i}$
-        \State $\{S, \{e_{\mathrm{mag,}i}, e_{\mathrm{dir,}i}, e_{\mathrm{var,}i}\}\}$を$L$に追加\label{algo:holding_filter_force_local_1}
-    \EndFor
-
-    \State $L$内で最大の$S$を持つ要素を探索
-    \State \Return その要素の生素点$\{e_{\mathrm{mag,}i}, e_{\mathrm{dir,}i}, e_{\mathrm{var,}i}\}$\label{algo:holding_filter_force_local_2}
+    \State \fix[Find element in $L$ with maximum $S$]
+    \State \fix[\Return the raw values $\{e_{\mathrm{mag,}i},e_{\mathrm{dir,}i},e_{\mathrm{var,}i}\}$ of that element.] \label{algoline:holding_sub-return}
+    
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
@@ -500,22 +514,24 @@ S_{\mathrm{dyn},i} = w_{\mathrm{mag}} \tilde{E}_{\mathrm{mag,}i} + w_{\mathrm{di
 
 \begin{table}[t]
 \centering
-\caption{{\namegraspforce}生成結果の比較}
+\caption{The results of generating {\namegraspforceENG}}
 \label{tab:holding_exp_generate_force}
 \begin{tabular}{cccrcc}
 \toprule
-\multirow{2}{*}{\shortstack{点群\\番号}} & \multicolumn{2}{c}{提案手法} & \multicolumn{2}{c}{ランダム$\bm{k}$法} & \multirow{2}{*}{\shortstack{改善率\\\%}} \\
-         \cmidrule{2-3} \cmidrule{4-5}
-         & 成功数 & 成功率/\% & 成功数 & 成功率/\% &  \\
+\multirow{2}{*}{\shortstack{Point\\Cloud\\No.}} & \multicolumn{2}{c}{Proposed Method} & \multicolumn{2}{c}{Random $\bm{k}$} &  \multirow{2}{*}[-0.5em]{\shortstack{Improve\\\%}}               \\
+         \cmidrule{2-3}
+         \cmidrule{4-5}
+         % \cline{1-5}
+         & Passed            & Ratio/\%        & Passed            & Ratio/\%         &  \\
          \midrule
-1 & 56661961 & 31.47 & 6918682 & 3.84 & 818.97 \\
-2 & 32693962 & 18.16 & 4447361 & 2.47 & 735.13 \\
-3 & 71345970 & 39.63 & 9037480 & 5.02 & 789.45 \\
-4 & 77728717 & 43.18 & 10174652 & 5.65 & 763.94 \\
-5 & 33053551 & 18.36 & 4081123 & 2.27 & 809.91 \\
-6 & 77206038 & 42.89 & 10616018 & 5.90 & 727.26 \\
+1        & 56661961         & 31.47           & 6918682          & 3.84             & 818.97          \\
+2        & 32693962         & 18.16           & 4447361          & 2.47             & 735.13          \\
+3        & 71345970         & 39.63           & 9037480          & 5.02             & 789.45          \\
+4        & 77728717         & 43.18           & 10174652         & 5.65             & 763.94          \\
+5        & 33053551         & 18.36           & 4081123          & 2.27             & 809.91          \\
+6        & 77206038         & 42.89           & 10616018         & 5.90             & 727.26          \\
          \midrule
-平均 & 58115033 & 32.28 & 7545886 & 4.19 & 774.11 \\
+Avg.     & 58115033         & 32.28           & 7545886          & 4.19             & 774.11          \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -533,7 +549,7 @@ S_{\mathrm{dyn},i} = w_{\mathrm{mag}} \tilde{E}_{\mathrm{mag,}i} + w_{\mathrm{di
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.85\linewidth]{fig/chp_holding/ICRA2024_HoldingExp.png}
-    \caption{各手法により選定された{\nameholdingpointset}と切断後の食材の様子．行は各手法（A〜D），列は異なる食材試行に対応する．}
+    \caption{Images of the food-stuffs cut by each type of method (in the row).}
     \label{fig:holding_exp_holding_points_type}
 \end{figure}
 
@@ -548,33 +564,33 @@ S_{\mathrm{dyn},i} = w_{\mathrm{mag}} \tilde{E}_{\mathrm{mag,}i} + w_{\mathrm{di
 \begin{table}[H]
 \centering
 \setlength{\tabcolsep}{3pt}
-\caption{切断前後における食材の平行移動量（pixel）と回転量（deg）．ジャガイモ6試行，玉ねぎ4試行．}
+\caption{Translation (in pixel) \& rotation (in degree) after cutting. The potato cut 6 times, onion cut 4 times.}
 \label{tab:holding_exp_result}
 \begin{tabular}{ccccccccccc}
 \hline
-\multirow{2}{*}{\shortstack{把持\\手法}} &
-  \multirow{2}{*}{食材} &
-  \multirow{2}{*}{\shortstack{データ\\種別}} &
-  \multirow{2}{*}{平均} &
-  \multirow{2}{*}{標準偏差} &
-  \multicolumn{6}{c}{各試行} \\ \cline{6-11}
-                   & & & & & 1 & 2 & 3 & 4 & 5 & 6 \\ \hline
-\multirow{4}{*}{A} & \multirow{2}{*}{Potato} & T & 113.85 & 93.13  & 259.40 & 47.00  & 197.70 & 61.50  & 28.20  & 89.30 \\
-                   &                         & R & 3.48   & 4.30   & 0.00   & 0.00   & 3.53   & 0.00   & 7.65   & 9.70 \\ \cline{2-11}
-                   & \multirow{2}{*}{Onion}  & T & 84.45  & 117.06 & 14.40  & 14.80  & 50.40  & 258.20 & ---    & --- \\
-                   &                         & R & 0.99   & 1.99   & 0.00   & 0.00   & 0.00   & 3.97   & ---    & --- \\ \hline
-\multirow{4}{*}{B} & \multirow{2}{*}{Potato} & T & 230.03 & 290.15 & 646.00 & 24.00  & 12.30  & 36.70  & 106.50 & 554.70 \\
-                   &                         & R & 5.28   & 6.36   & 13.12  & 0.00   & 0.00   & 0.00   & 5.73   & 12.84 \\ \cline{2-11}
-                   & \multirow{2}{*}{Onion}  & T & 41.03  & 16.49  & 48.50  & 35.30  & 59.20  & 21.10  & ---    & --- \\
-                   &                         & R & 0.00   & 0.00   & 0.00   & 0.00   & 0.00   & 0.00   & ---    & --- \\ \hline
-\multirow{4}{*}{C} & \multirow{2}{*}{Potato} & T & 165.07 & 191.30 & 526.20 & 76.40  & 114.50 & 21.70  & 222.00 & 29.60 \\
-                   &                         & R & 3.85   & 5.54   & 14.50  & 0.00   & 2.14   & 5.06   & 1.40   & 0.00 \\ \cline{2-11}
-                   & \multirow{2}{*}{Onion}  & T & 142.90 & 109.59 & 289.80 & 145.90 & 108.00 & 27.90  & ---    & --- \\
-                   &                         & R & 4.01   & 5.16   & 11.45  & 3.43   & 1.15   & 0.00   & ---    & --- \\ \hline\hline
-\multirow{4}{*}{D} & \multirow{2}{*}{Potato} & T & 407.50 & 198.05 & 759.50 & 304.70 & 263.70 & 520.30 & 345.50 & 251.30 \\
-                   &                         & R & 7.69   & 7.31   & 16.92  & 1.62   & 3.34   & 8.39   & 15.87  & 0.00 \\ \cline{2-11}
-                   & \multirow{2}{*}{Onion}  & T & 429.70 & 202.56 & 160.40 & 403.30 & 633.00 & 522.10 & ---    & --- \\
-                   &                         & R & 6.22   & 3.38   & 1.28   & 7.25   & 7.39   & 8.96   & ---    & --- \\ \hline
+\multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}Holding\\ Type\end{tabular}} &
+  \multirow{2}{*}{Food} &
+  \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}Data\\ Type\end{tabular}} &
+  \multirow{2}{*}{Avg.} &
+  \multirow{2}{*}{Std.} &
+  \multicolumn{6}{c}{Oringin Data} \\ \cline{6-11} 
+                   &                         &                        &        &                             & 1      & 2      & 3      & 4      & 5      & 6      \\ \hline
+\multirow{4}{*}{A} & \multirow{2}{*}{Potato} & \multicolumn{1}{c|}{T} & 113.85 & \multicolumn{1}{c|}{93.13}  & 259.40 & 47.00  & 197.70 & 61.50  & 28.20  & 89.30  \\
+                   &                         & \multicolumn{1}{c|}{R} & 3.48   & \multicolumn{1}{c|}{4.30}   & 0.00   & 0.00   & 3.53   & 0.00   & 7.65   & 9.70   \\ \cline{4-11} 
+                   & \multirow{2}{*}{Onion}  & \multicolumn{1}{c|}{T} & 84.45  & \multicolumn{1}{c|}{117.06} & 14.40  & 14.80  & 50.40  & 258.20 & ---    & ---    \\
+                   &                         & \multicolumn{1}{c|}{R} & 0.99   & \multicolumn{1}{c|}{1.99}   & 0.00   & 0.00   & 0.00   & 3.97   & ---    & ---    \\ \hline
+\multirow{4}{*}{B} & \multirow{2}{*}{Potato} & \multicolumn{1}{c|}{T} & 230.03 & \multicolumn{1}{c|}{290.15} & 646.00 & 24.00  & 12.30  & 36.70  & 106.50 & 554.70 \\
+                   &                         & \multicolumn{1}{c|}{R} & 5.28   & \multicolumn{1}{c|}{6.36}   & 13.12  & 0.00   & 0.00   & 0.00   & 5.73   & 12.84  \\ \cline{2-11} 
+                   & \multirow{2}{*}{Onion}  & \multicolumn{1}{c|}{T} & 41.03  & \multicolumn{1}{c|}{16.49}  & 48.50  & 35.30  & 59.20  & 21.10  & ---    & ---    \\
+                   &                         & \multicolumn{1}{c|}{R} & 0.00   & \multicolumn{1}{c|}{0.00}   & 0.00   & 0.00   & 0.00   & 0.00   & ---    & ---    \\ \hline
+\multirow{4}{*}{C} & \multirow{2}{*}{Potato} & \multicolumn{1}{c|}{T} & 165.07 & \multicolumn{1}{c|}{191.30} & 526.20 & 76.40  & 114.50 & 21.70  & 222.00 & 29.60  \\
+                   &                         & \multicolumn{1}{c|}{R} & 3.85   & \multicolumn{1}{c|}{5.54}   & 14.50  & 0.00   & 2.14   & 5.06   & 1.40   & 0.00   \\ \cline{2-11} 
+                   & \multirow{2}{*}{Onion}  & \multicolumn{1}{c|}{T} & 142.90 & \multicolumn{1}{c|}{109.59} & 289.80 & 145.90 & 108.00 & 27.90  & ---    & ---    \\
+                   &                         & \multicolumn{1}{c|}{R} & 4.01   & \multicolumn{1}{c|}{5.16}   & 11.45  & 3.43   & 1.15   & 0.00   & ---    & ---    \\ \hline\hline
+\multirow{4}{*}{D} & \multirow{2}{*}{Potato} & \multicolumn{1}{c|}{T} & 407.50 & \multicolumn{1}{c|}{198.05} & 759.50 & 304.70 & 263.70 & 520.30 & 345.50 & 251.30 \\
+                   &                         & \multicolumn{1}{c|}{R} & 7.69   & \multicolumn{1}{c|}{7.31}   & 16.92  & 1.62   & 3.34   & 8.39   & 15.87  & 0.00   \\ \cline{2-11} 
+                   & \multirow{2}{*}{Onion}  & \multicolumn{1}{c|}{T} & 429.70 & \multicolumn{1}{c|}{202.56} & 160.40 & 403.30 & 633.00 & 522.10 & ---    & ---    \\
+                   &                         & \multicolumn{1}{c|}{R} & 6.22   & \multicolumn{1}{c|}{3.38}   & 1.28   & 7.25   & 7.39   & 8.96   & ---    & ---    \\ \hline
 \end{tabular}
 \end{table}
 
@@ -593,7 +609,7 @@ S_{\mathrm{dyn},i} = w_{\mathrm{mag}} \tilde{E}_{\mathrm{mag,}i} + w_{\mathrm{di
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.95\linewidth]{fig/chp_holding/exp_full_cutting.png}
-    \caption{完全切断実験の様子．行はジャガイモおよび玉ねぎの試行，列は把持前から切断後に至る逐次的段階を示す．}
+    \caption{\fix[Snapshots of the cutting process. The rows correspond to different experimental trials with potatoes and onions, while the columns depict the sequential stages of the task (from 'Before Holding' to 'After Cutting').]}
     \label{fig:holding_exp_full_cutting}
 \end{figure}
 
@@ -607,19 +623,40 @@ S_{\mathrm{dyn},i} = w_{\mathrm{mag}} \tilde{E}_{\mathrm{mag,}i} + w_{\mathrm{di
 \subsection{計算コスト分析と実応用に向けた考察}
 \label{subsec:holding_exp_computation}
 
-\begin{table}[H]
+% \begin{table}[H]
+%   \centering
+%   \caption{\fix[Computation time and score at different point counts.]}
+%   % 使用 resizebox 自动缩放表格以适应页面宽度
+%   \resizebox{\linewidth}{!}{%
+%   \fix[
+%   \begin{tabular}{lccccccccc}
+%     \toprule
+%     \textbf{Point Count} & 7 & 11 & 22 & 62 & 114 & \textbf{169} & 356 & 668 & 1220 \\
+%     \midrule
+%     \textbf{Time (s)}    & 3.3 & 3.7 & 6.9 & 12.9 & 32.8 & \textbf{75.4} & 283.0 & 995.0 & 3297.7 \\
+%     \textbf{Best Score}  & -- & -- & 20.31 & 22.19 & 22.19 & \textbf{22.85} & 22.89 & 22.74 & 22.82 \\
+%     \bottomrule
+%   \end{tabular}%
+% ]
+%   % }
+% \end{table}
+\begin{table}[t]
   \centering
-  \caption{点群密度に対する計算時間と評価スコアの変化}
+  \caption{\fix[Computation time and score at different point counts.]}
+  % 使用 resizebox 自动缩放表格以适应页面宽度
   \label{tab:holding_sensitivity_analysis}
-  % \resizebox{\linewidth}{!}{%
+  % \resizebox{\linewidth}{!}
+  % {%
+  \fix[
   \begin{tabular}{lccccccccc}
     \toprule
-    \textbf{点数} & 7 & 11 & 22 & 62 & 114 & \textbf{169} & 356 & 668 & 1220 \\
+    \textbf{Point Count} & 7 & 11 & 22 & 62 & 114 & \textbf{169} & 356 & 668 & 1220 \\
     \midrule
-    \textbf{時間 (s)}    & 3.3 & 3.7 & 6.9 & 12.9 & 32.8 & \textbf{75.4} & 283.0 & 995.0 & 3297.7 \\
-    \textbf{スコア}  & -- & -- & 20.31 & 22.19 & 22.19 & \textbf{22.85} & 22.89 & 22.74 & 22.82 \\
+    \textbf{Time (s)}    & 3.3 & 3.7 & 6.9 & 12.9 & 32.8 & \textbf{75.4} & 283.0 & 995.0 & 3297.7 \\
+    \textbf{Best Score}  & -- & -- & 20.31 & 22.19 & 22.19 & \textbf{22.85} & 22.89 & 22.74 & 22.82 \\
     \bottomrule
   \end{tabular}%
+]
   % }
 \end{table}
 

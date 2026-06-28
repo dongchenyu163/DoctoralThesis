@@ -47,7 +47,7 @@
   \item 食材表面の3D点群モデルから，ピーラーが倣うべき基準軌跡を生成する．
   \item 食材表面の法線変化に基づき，基準軌跡を実行しやすい複数の軌跡区間へ分割する．
   \item ピーラーと食材表面の接触を維持するため，力覚フィードバックを用いて刃先位置を補正する．
-  \item 皮むき済み領域の境界を検出し，次回の食材回転角を決定する．
+  \item 非皮領域の境界を検出し，次回の食材回転角を決定する．
   \item 皮むき動作と食材回転を反復し，終了条件を満たすまで皮むき範囲を拡大する．
 \end{enumerate}
 
@@ -79,7 +79,7 @@
   \item 断面輪郭から，到達困難な下側部分を除去し，到達可能な基準軌跡 $L$ を得る．
   \item 基準軌跡 $L$ 上の法線変化を用いて，軌跡を複数のセグメント $s_j$ に分割する．
   \item 各セグメントに沿ってピーラーを移動させ，力覚フィードバックにより接触力を維持する（一回皮むき動作の実行）．
-  \item 一回皮むき動作の後，RGB情報を用いて皮むき済み領域とその境界 $L_p$ を抽出する．
+  \item 一回皮むき動作の後，RGB情報を用いて非皮領域とその境界 $L_p$ を抽出する．
   \item 境界近傍の平均法線 $\mathbf{n}_{\mathrm{avg}}$ から，食材の回転角 $\alpha$ を計算する．
   \item 食材を $\mathbf{v}_{\mathrm{rot}}$ 周りに $\alpha$ だけ回転させ，次の一回皮むき動作へ移る．
   \item 終了判定を満たすまで，必要に応じて点群を再取得しながら，ステップ2〜8を反復する．
@@ -103,7 +103,7 @@
 
 \begin{enumerate}
   \item \textbf{食材表面点群 $P_{\mathrm{all}}$} \\
-  食材全体の外表面を表すRGB点群であり，基準軌跡の抽出，皮むき済み領域の検出，終了判定に用いる．
+  食材全体の外表面を表すRGB点群であり，基準軌跡の抽出，非皮領域の検出，終了判定に用いる．
   $P_{\mathrm{all}}$ は，第3章の共通処理パイプライン（多視点撮影，座標変換，統合，ダウンサンプリング，外れ値除去，クラスタリング，MLS平滑化）を経て得られたものであり，各点は3次元座標 $(x, y, z)$，RGB色情報，および法線ベクトル $\mathbf{n}_i$ を有する．
   法線ベクトルはMLS（Moving Least Squares）法\cite{PCL-MLS}により計算され，食材の外側を向くよう統一されている．
 
@@ -112,8 +112,8 @@
   法線情報は，軌跡分割，ピーラー姿勢の決定，食材回転角の計算に用いる．
 
   \item \textbf{RGB情報} \\
-  皮と皮むき済み領域の色差を利用し，皮むき済み領域および境界 $L_p$ を抽出するために用いる．
-  具体的には，RGB色空間からHSV色空間への変換を行い，事前に定義されたHSV範囲に基づいて皮むき済み領域を識別する．
+  皮と非皮領域の色差を利用し，非皮領域および境界 $L_p$ を抽出するために用いる．
+  具体的には，RGB色空間からHSV色空間への変換を行い，事前に定義されたHSV範囲に基づいて非皮領域を識別する．
 
   \item \textbf{作業台平面と回転軸} \\
   作業台平面を $\mathcal{P}_T$，その法線を $\mathbf{n}_{\mathrm{ct}}$ とする．
@@ -181,25 +181,24 @@ $\mathcal{P}_{c2}$ は，回転軸 $\mathbf{v}_{\mathrm{rot}}$ を通り，そ�
 ここで，$\mathbf{v}_i$ は世界座標系の原点から点群 $P_{\mathrm{all}}$ 中の点 $\mathbf{p}_i$ へ向かうベクトルである．
 除去後に残った輪郭を，到達可能な基準軌跡 $L$ とする．
 基準軌跡 $L$ の点群を $P_L$ と表記する．
-この処理を図\ref{fig:trajectory_peeling}に示す。
+この処理を図\ref{fig:peeling_trajectory}に示す。
 
 \begin{figure}[t]
     \centering
     \begin{subfigure}[t]{.45\textwidth}
-        \centering
-        \includegraphics[width=1\textwidth]{fig/chp_peeling/Trajectory_cutting.png}
-        \caption{切断平面1 $\mathcal{P}_{c1}$ によって切り取られる断面領域 $A_c$。黄色の線 $L_c$ が断面の輪郭である。}
-        \label{fig:trajectory.sub1}
+    	\centering
+    	\includegraphics[width=1\textwidth]{fig/chp_peeling/Trajectory_cutting.png}
+    	\caption{The cross-section area $\mathrm{A_c}$ that is cut by the cutting plane 1 $\mathcal{P}_\mathrm{c1}$. The yellow line $L_\mathrm{c}$ is the edge of the cross-section area.}
+    	\label{fig:peeling_trajectory.sub1}
     \end{subfigure}
-    \hfill
     \begin{subfigure}[t]{.45\textwidth}
-        \centering
-        \includegraphics[width=1\textwidth]{fig/chp_peeling/Trajectory.png}
-        \caption{基準軌跡の生成結果。黄色の線が最終的な軌跡 $L$。青い線 $L'$（食材の下側）は使用されない軌跡。}
-        \label{fig:trajectory.sub2}
+    	\centering
+    	\includegraphics[width=1\textwidth]{fig/chp_peeling/Trajectory.png}
+    	\caption{The result of creating the reference trajectory. The yellow line is the final trajectory $L$. The blue line $L'$ (bottom side of the food) is the trajectory that is not used.}
+    	\label{fig:peeling_trajectory.sub2}
     \end{subfigure}
-    \caption{灰色の物体は皮むき対象の食材形状 $\mathrm{S}$。オレンジ色の大きな平面は作業台平面 $\mathcal{P}_T$。画像左側の小さなオレンジ色の平面で作業台平面に垂直なものは切断平面1 $\mathcal{P}_{c1}$。画像右側の小さなオレンジ色の平面で作業台平面に平行なものは切断平面2 $\mathcal{P}_{c2}$。緑色の線は人手で与える回転軸 $\mathbf{v}_{\mathrm{rot}}$ である。}
-    \label{fig:trajectory_peeling}
+    \caption{The gray object is the shape of the food $\mathrm{S}$, which we is subject to peel. The largest plane with orange color is the table plane $\mathcal{P}_T$. The small plane on the left side of the images with orange color, perpendicular to the table plane, is the cutting plane 1 $\mathcal{P}_\mathrm{c1}$. The small plane on the right side of the images with orange color, parallel to the table plane, is the cutting plane 2 $\mathcal{P}_\mathrm{c2}$. The green line is the rotation axis $\mathbf{v_\mathrm{rot}}$ that is determined by human}
+    \label{fig:peeling_trajectory}
 \end{figure}
 
 
@@ -267,29 +266,29 @@ SII2021\cite{SII2021}の実験では，$\theta_{\mathrm{th}} = 30^\circ$ を閾�
 回転角が大きすぎると剥き残しが生じ，小さすぎると既剥き領域を重複して剥くことになり作業効率が低下する．
 そこで，一回皮むき動作で実際に剥かれた領域の境界を検出し，その幾何情報から次回の回転角を計算する手法をとる．
 
-\subsubsection{皮むき済み領域の抽出}
+\subsubsection{非皮領域の抽出}
 
 一回皮むき動作の後，ピーラー側の腕を食材の上方へ移動させ，RGB-Dカメラにより食材上面のRGB点群（以下，元RGB点群と呼ぶ）を取得する．
 この元RGB点群から，第3章で述べた共通処理を適用し，食材表面のRGB点群 $P_{\mathrm{rgb}}$ を得る．
 さらに，各点の法線ベクトルを計算する．
 
-次に，$P_{\mathrm{rgb}}$ の各点の色情報をRGB色空間からHSV色空間に変換し，事前に定義された皮むき済み領域（非皮領域）のHSV範囲に基づいて，非皮領域の点群を抽出する．
+次に，$P_{\mathrm{rgb}}$ の各点の色情報をRGB色空間からHSV色空間に変換し，事前に定義された非皮領域（非皮領域）のHSV範囲に基づいて，非皮領域の点群を抽出する．
 この色範囲は人間が事前に指定する．
 抽出された非皮領域点群に対してクラスタリングを適用し，最大クラスタを非皮領域 $P_{\mathrm{cluster}}$ とする．
 各食材の非皮領域抽出に用いるHSV範囲の例を表\ref{tab:hsv_range}に示す．
 
 \begin{table}[ht]
   \centering
-  \caption{各食材の非皮領域抽出に用いるHSV範囲の例}
+  \caption{The HSV color range of the peeled area extraction for each food}
   \label{tab:hsv_range}
   \begin{tabular}{@{}lccc@{}}
     \toprule
-    食材 & H [0, 180] & S [0, 256] & V [0, 256] \\
+    Food & H [0, 180] & S [0, 256] & V [0, 256] \\
     \midrule
-    りんご & [10, 156] & --- & --- \\
-    きゅうり & [30, 60] & [30, 256] & [30, 256] \\
-    なす & [0, 125], [155, 180] & [60, 256] & --- \\
-    じゃがいも & [20, 25] & [64, 112] & [221, 256] \\
+    Apple & [10, 156] & --- & --- \\
+    Cucumber & [30, 60] & [30, 256] & [30, 256] \\
+    Eggplant & [0, 125], [155, 180] & [60, 256] & --- \\
+    Potato & [20, 25] & [64, 112] & [221, 256] \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -302,7 +301,7 @@ SII2021\cite{SII2021}の実験では，$\theta_{\mathrm{th}} = 30^\circ$ を閾�
 非皮領域点群 $P_{\mathrm{cluster}}$ から，$x$ 座標と $z$ 座標がともに最大となる点 $\mathbf{p}_{\mathrm{pe}}$ を抽出する．
 この点 $\mathbf{p}_{\mathrm{pe}}$ の $x$ 座標を $X_{\mathrm{pe}}$ とする．
 次に，{元のRGB点群 $P_{\mathrm{rgb}}$}（非皮領域のみを抽出する前の点群）から，$x$ 座標が $[X_{\mathrm{pe}}, X_{\mathrm{pe}} + d]$ の範囲に含まれる点群を抽出する．
-これらを皮むき済み領域の境界点群 $L_p$ とする．
+これらを非皮領域の境界点群 $L_p$ とする．
 SII2021\cite{SII2021}の実験では，$d = 1$\,mm とした．
 
 境界点群 $L_p$ の各点の法線ベクトル $\mathbf{n}_{\mathrm{pe}}$ を用いて，平均法線 $\mathbf{n}_{\mathrm{avg}}$ を以下の式で計算する．
@@ -330,7 +329,7 @@ SII2021\cite{SII2021}の実験では，$d = 1$\,mm とした．
   \item $\mathbf{n}_{\mathrm{avg}}$ と $\mathbf{v}_{\mathrm{ref}}$ のなす角 $\alpha$ を回転角として求める．
 \end{enumerate}
 
-この回転角計算は，皮むき済み領域の境界を法線情報から定量化し，次の皮むき位置を決定する「幾何学的分析」の一部として位置づけられる．
+この回転角計算は，非皮領域の境界を法線情報から定量化し，次の皮むき位置を決定する「幾何学的分析」の一部として位置づけられる．
 食材の多様な曲率に対しても，境界近傍の法線平均を用いることで，局所的な形状変動に安定な回転角が得られる．
 
 \section{皮むき動作計画・制御}
@@ -438,17 +437,17 @@ SII2021\cite{SII2021}の実験で用いられた力覚フィードバック制�
 
 \begin{table}[ht]
   \centering
-  \caption{力覚フィードバック制御のパラメータ}
+  \caption{The parameters of force feedback control}
   \label{tab:force_params}
   \begin{tabular}{@{}lcl@{}}
     \toprule
-    パラメータ & 記号 & 値 \\
+    Parameters & Notation & Value \\
     \midrule
-    目標接触力 & $f_c$ & 5.0\,N \\
-    力誤差感度 & $a$ & 10.0 \\
-    デッドゾーン幅 & $b$ & 0.05 \\
-    最低速度 & $v_{\mathrm{lim}}$ & 0.1\,mm/s \\
-    速度上限 & $v_{\mathrm{max}}$ & 20.0\,mm/s \\
+    Contact force & $f_c$ & 5.0\,N \\
+    Error sensitivity & $a$ & 10.0 \\
+    Range of dead-zone & $b$ & 0.05 \\
+    Speed min & $v_{\mathrm{lim}}$ & 0.1\,mm/s \\
+    Speed max & $v_{\mathrm{max}}$ & 20.0\,mm/s \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -462,18 +461,18 @@ SII2021\cite{SII2021}の実験で用いられた力覚フィードバック制�
 \subsubsection{食材の回転操作}
 
 一回皮むき動作が終了し，\ref{sec:peeling_rotation_calc}で述べた手順により回転角 $\alpha$ が計算された後，食材固定側の腕が食材を回転軸 $\mathbf{v}_{\mathrm{rot}}$ 周りに角度 $\alpha$ だけ回転させる．
-この回転操作により，皮むき済み領域の隣接部がピーラー側に向き，次の一回皮むき動作の対象となる．
+この回転操作により，非皮領域の隣接部がピーラー側に向き，次の一回皮むき動作の対象となる．
 
 回転操作は，食材固定側のエンドエフェクタの回転軸周りの角度制御により実現される．
 串を介して食材に回転が伝達されるため，食材と串の固定が不十分な場合には滑りが生じる可能性があるが，本実験で用いた専用エンドエフェクタ（第3章参照）により，安定した回転伝達が確保されている．
 
-にんじんのように皮むき済み領域の色認識が困難で，\ref{sec:peeling_rotation_calc}の回転角計算が適用できない食材については，固定回転角 $\alpha = 20^\circ$ を用いる．
+にんじんのように非皮領域の色認識が困難で，\ref{sec:peeling_rotation_calc}の回転角計算が適用できない食材については，固定回転角 $\alpha = 20^\circ$ を用いる．
 この固定値は，他の食材（りんご，きゅうり，なす，じゃがいも）における回転操作回数が17〜19回の範囲に収束した実験結果に基づいて定められたものである．
 すなわち，18回程度の回転で全周（$360^\circ$）をカバーするとして，$360^\circ / 18 = 20^\circ$ を固定値として採用した．
 
 \subsubsection{終了判定}
 
-皮むき作業の終了は，現在の食材側面における皮むき済み領域の割合に基づいて判定する．
+皮むき作業の終了は，現在の食材側面における非皮領域の割合に基づいて判定する．
 具体的には，非皮領域の点数 $N_{\mathrm{pe}}$ と，対象側面の全表面点数 $N_{\mathrm{side}}$ の比 $r_s$ を以下のように定義する．
 
 \begin{equation}
@@ -507,7 +506,7 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 \begin{figure*}[t]
     \centering
     \includegraphics[width=0.7\textwidth]{fig/chp_peeling/sequence.png}
-    \caption{提案手法の実験手順．終了条件を満たさなければ Step~8 の後に Step~2 へ戻る．}
+    \caption{The sequence of the proposed method. Note that if the stop condition is not satisfied, the procedure returns to step 2 while the step 8 was done.}
     \label{fig:ch4_sequence}
 \end{figure*}
 
@@ -531,26 +530,26 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
   
   \item \textbf{じゃがいも}：表面が粗く凹凸があり，点群モデルと実表面のずれが生じやすい食材である．力覚フィードバックによる補正の有効性を確認する対象となる．1個を用いた．
 
-  \item \textbf{にんじん}：皮と中身の色が類似しており，皮むき済み領域の色認識が難しい食材である．RGB情報に基づく境界検出の限界を確認し，固定回転角による代替手法の有効性を検証する対象となる．1個を用いた．
+  \item \textbf{にんじん}：皮と中身の色が類似しており，非皮領域の色認識が難しい食材である．RGB情報に基づく境界検出の限界を確認し，固定回転角による代替手法の有効性を検証する対象となる．1個を用いた．
 \end{enumerate}
 
 \begin{table}[ht]
   \centering
-  \caption{実験に用いたりんごのサイズ}
+  \caption{The size of apple for experiment.}
   \label{tab:apple_sizes}
   \begin{tabular}{@{}lcc@{}}
     \toprule
-    りんご & 横径 [mm] & 縦径 [mm] \\
+    Apple & Width [mm] & Length [mm] \\
     \midrule
-    大1 & 95.45 & 82.50 \\
-    大2 & 95.15 & 84.40 \\
-    大3 & 94.50 & 81.35 \\
-    中1 & 80.50 & 68.50 \\
-    中2 & 80.25 & 74.35 \\
-    中3 & 79.05 & 69.85 \\
-    小1 & 53.95 & 48.85 \\
-    小2 & 53.90 & 52.25 \\
-    小3 & 55.05 & 46.60 \\
+    Big 1 & 95.45 & 82.50 \\
+    Big 2 & 95.15 & 84.40 \\
+    Big 3 & 94.50 & 81.35 \\
+    Medium 1 & 80.50 & 68.50 \\
+    Medium 2 & 80.25 & 74.35 \\
+    Medium 3 & 79.05 & 69.85 \\
+    Small 1 & 53.95 & 48.85 \\
+    Small 2 & 53.90 & 52.25 \\
+    Small 3 & 55.05 & 46.60 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -584,7 +583,7 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
   \label{eq:peeling_ratio}
 \end{equation}
 
-ここで，$r$ は皮むき済み領域（非皮領域）の点数の，全表面点数に対する比率を表す．
+ここで，$r$ は非皮領域（非皮領域）の点数の，全表面点数に対する比率を表す．
 すなわち，$r = 1.0$ が完全な皮むきを意味する．
 
 \subsection{実験結果}
@@ -592,7 +591,7 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.7\textwidth]{fig/chp_peeling/result.png}
-    \caption{皮むき実験の結果．左上：りんご（大・中・小），右上：きゅうり，左中：なす，右中：じゃがいも，下：にんじん．}
+    \caption{The result of peeling experiment．Top left: Apples (large, medium, small); Top right: Cucumbers; Bottom left: Eggplants; Bottom middle: Potatoes; Bottom right: Carrots.}
     \label{fig:ch4_result}
 \end{figure}
 
@@ -600,21 +599,18 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 
 りんご9個（大3，中3，小3）の皮むき実験結果を図\ref{fig:ch4_result}と表\ref{tab:apple_result}に示す．
 
-\begin{table}[ht]
-  \centering
-  \caption{りんごの皮むき結果（SII2021\cite{SII2021}より）}
-  \label{tab:apple_result}
-  \begin{tabular}{@{}cccc@{}}
-    \toprule
-    \multirow{2}{*}{試行} & \multicolumn{3}{c}{皮むき率 [\%]} \\
-    \cmidrule{2-4}
-    & 大サイズ & 中サイズ & 小サイズ \\
-    \midrule
-    1 & 78.01 & 88.85 & 85.93 \\
-    2 & 79.83 & 84.25 & 90.93 \\
-    3 & 82.69 & 84.11 & 88.62 \\
-    \bottomrule
-  \end{tabular}
+\begin{table}[t]
+\centering
+\caption{Peeling results for apple.}
+\begin{tabular}{cccc}
+	\hline
+	\multirow{2}{*}{Trails} & \multicolumn{3}{c}{Ratio of the peeled area {[}\%{]}} \\ \cline{2-4} 
+	& Large size     & Medium size     & Small size     \\ \hline
+	1                       & 78.01          & 88.85           & 85.93          \\
+	2                       & 79.83          & 84.25           & 90.93          \\
+	3                       & 82.69          & 84.11           & 88.62          \\ \hline
+\end{tabular}
+\label{tab:apple-result}
 \end{table}
 
 りんごの結果から，全ての試行で皮むき率78\%以上を達成し，提案手法が曲率の大きな食材に対しても有効であることが確認された．
@@ -625,20 +621,16 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 
 きゅうり，なすの皮むき実験結果を図\ref{fig:ch4_result}と表\ref{tab:cucumber_eggplant_result}に示す．
 
-\begin{table}[ht]
-  \centering
-  \caption{きゅうり，なす，じゃがいも，にんじんの皮むき結果（SII2021\cite{SII2021}より．にんじんは目視推定）}
-  \label{tab:cucumber_eggplant_result}
-  \begin{tabular}{@{}lcc@{}}
-    \toprule
-    食材 & 皮むき率 [\%] & 備考 \\
-    \midrule
-    きゅうり & 94.31 & --- \\
-    なす & 90.23 & --- \\
-    じゃがいも & 88.72 & --- \\
-    にんじん & 95.00 & 目視推定 \\
-    \bottomrule
-  \end{tabular}
+\begin{table}[t]
+\centering
+\caption{Peeling results of other food. Note that the result for carrot were estimated by human eyes.}
+\begin{tabular}{ccccc}
+	\hline
+	\multirow{2}{*}{Trails} & \multicolumn{4}{c}{Ratio of peeled area {[}\%{]}} \\ \cline{2-5} 
+	& Cucumber    & Eggplant    & Potato    & Carrot    \\ \hline
+	1                       & 94.31       & 90.23       & 88.72     & 95.00     \\ \hline
+\end{tabular}
+\label{tab:others-result}
 \end{table}
 
 きゅうり，なすのような表面の法線方向の変化が小さい食材では，りんごよりも法線のばらつきが小さいため，90\%以上の高い皮むき率が達成された．
@@ -673,25 +665,25 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 
 \begin{table}[ht]
   \centering
-  \caption{各食材の回転操作回数}
+  \caption{The times of rotation motion for each food}
   \label{tab:rotation_times}
   \begin{tabular}{@{}lcc@{}}
     \toprule
-    食材 &  & 回数 \\
+    Food &  & Rotation Times \\
     \midrule
-    & 大1 & 18 \\
-    & 大2 & 18 \\
-    & 大3 & 17 \\
-    & 中1 & 18 \\
-    りんご & 中2 & 19 \\
-    & 中3 & 18 \\
-    & 小1 & 18 \\
-    & 小2 & 18 \\
-    & 小3 & 17 \\
+    & Big 1 & 18 \\
+    & Big 2 & 18 \\
+    & Big 3 & 17 \\
+    & Medium 1 & 18 \\
+Apple & Medium 2 & 19 \\
+    & Medium 3 & 18 \\
+    & Small 1 & 18 \\
+    & Small 2 & 18 \\
+    & Small 3 & 17 \\
     \midrule
-    きゅうり &  & 17 \\
-    なす &  & 18 \\
-    じゃがいも &  & 19 \\
+    Cucumber &  & 17 \\
+    Eggplant &  & 18 \\
+    Potato &  & 19 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -722,7 +714,7 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 
 \subsubsection{皮むき済み境界に基づく回転角計算の有効性と制限}
 
-皮むき済み領域を色情報により認識できる場合（りんご，きゅうり，なす），境界 $L_p$ と平均法線 $\mathbf{n}_{\mathrm{avg}}$ に基づいて次の回転角を決定する手法は有効に機能した．
+非皮領域を色情報により認識できる場合（りんご，きゅうり，なす），境界 $L_p$ と平均法線 $\mathbf{n}_{\mathrm{avg}}$ に基づいて次の回転角を決定する手法は有効に機能した．
 特に，食材の曲率に応じて回転角が自動調整される点が，固定回転角を用いる手法に対する優位性である．
 
 一方，にんじんのように皮と中身の色差が小さい食材では，HSV色空間による境界抽出が困難となる．
