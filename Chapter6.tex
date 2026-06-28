@@ -44,7 +44,7 @@
 \begin{table}[t]
 \caption{List of Symbols}
 \centering
-\label{table:symbol}
+\label{tab:holding_symbol}
 \begin{tabular}[t]{lll}
 \hline
 Symbol & Name & Description \\ \hline
@@ -56,7 +56,7 @@ $\bm{t}_\mathrm{k}$ & knife wrench & 6-D force and torque applied to the food \\
 $\equfingerforce[i]$ & Finger tip force & 3-D Force vector of the $i$-th finger tip \\
 $\equgraspforcevector$ & {\namegraspforcecapENG} & \begin{tabular}[c]{@{}l@{}}Vector of tip forces of $n$ fingers arranged\\  as a column, a $3n$-D vector\end{tabular} \\
 $\Omega$ & & The surface shape of the food \\
-$\Omega_{\mathrm{c1,2}}$ & & Contact surfaces (right part in Fig.\ref{fig:method}) \\
+$\Omega_{\mathrm{c1,2}}$ & & Contact surfaces (right part in Fig.\ref{fig:holding_method}) \\
 % $\Omega_{\mathrm{g}}$ & & The surface part of the food used for holding 
 $\Omega_{\mathrm{g}}$ & & 
 \begin{tabular}[c]{@{}l@{}}The surface part of the food used for\\  holding\end{tabular}
@@ -99,26 +99,26 @@ $\Omega_{\mathrm{g}}$ & &
 \State $\mathbb{P}_\mathrm{all}$: All possible {\nameholdingpointsetENG} $P$ from \fix[$\Omega$].
 
 \State
-\For{\textbf{all} $(T, \bm v) \in \mathbb{T}$}  \label{algoline:global-knifepose-for-st}
+\For{\textbf{all} $(T, \bm v) \in \mathbb{T}$}  \label{algoline:holding_global-knifepose-for-st}
 
-    \State $\Omega_{\mathrm{c1}}, \Omega_{\mathrm{c2}}, \Omega_{\mathrm{g}}, \equsearchspace_\mathrm{init} \gets $\Call {PrepareData}{$\Omega$, $T$}  \label{algoline:exp1-st}    \label{algoline:global-PrepareData}
+    \State $\Omega_{\mathrm{c1}}, \Omega_{\mathrm{c2}}, \Omega_{\mathrm{g}}, \equsearchspace_\mathrm{init} \gets $\Call {PrepareData}{$\Omega$, $T$}  \label{algoline:holding_exp1-st}    \label{algoline:holding_global-PrepareData}
     \State $\equsearchspace \gets $\Call {FilterByGeoScore}{$\equsearchspace_\mathrm{init}$, $T$}
 
-    \For{$P \in (\mathbb{P}_\mathrm{all} \setminus \equsearchspace)$  }  \label{algoline:global-set-inf-score-st}
+    \For{$P \in (\mathbb{P}_\mathrm{all} \setminus \equsearchspace)$  }  \label{algoline:holding_global-set-inf-score-st}
         \State $\mathbb{S}[\equholdingpointset] \gets -\infty$
-    \EndFor  \label{algoline:global-set-inf-score-ed}
+    \EndFor  \label{algoline:holding_global-set-inf-score-ed}
   
     \State $\{S_\mathrm{pos, i}\} \gets$ \Call {CalPositionalScore}{$\equsearchspace$, $T$} 
 
-    \State $\bm{t}_\mathrm{k} \gets $\Call {CalKnifeForce}{$\Omega_{\mathrm{c1}}$, $\Omega_{\mathrm{c2}}$, $T$, $\bm v$}  \label{algoline:global-CalKnifeForce} \label{algoline:global-filter-force-st}
+    \State $\bm{t}_\mathrm{k} \gets $\Call {CalKnifeForce}{$\Omega_{\mathrm{c1}}$, $\Omega_{\mathrm{c2}}$, $T$, $\bm v$}  \label{algoline:holding_global-CalKnifeForce} \label{algoline:holding_global-filter-force-st}
 
-    \State $\{S_\mathrm{force, i}\} \gets$ \Call {CalDynamicScore}{$\bm{t}_\mathrm{k}, \equsearchspace $, $\Omega_{\mathrm{g}}$} \label{algoline:global-caldynamicscore}
+    \State $\{S_\mathrm{force, i}\} \gets$ \Call {CalDynamicScore}{$\bm{t}_\mathrm{k}, \equsearchspace $, $\Omega_{\mathrm{g}}$} \label{algoline:holding_global-caldynamicscore}
   
-    \For{$i\gets 1, N$} \label{algoline:global-accumulate-forcescore-st}
+    \For{$i\gets 1, N$} \label{algoline:holding_global-accumulate-forcescore-st}
         \State $ \mathbb{S}[\equholdingpointset[][i]] \gets \mathbb{S}[\equholdingpointset[][i]] + S_{\mathrm{pos}, i} + S_{\mathrm{force}, i}$
-    \EndFor \label{algoline:global-point-for-ed} \label{algoline:global-filter-force-ed}  \label{algoline:global-accumulate-forcescore-ed}
+    \EndFor \label{algoline:holding_global-point-for-ed} \label{algoline:holding_global-filter-force-ed}  \label{algoline:holding_global-accumulate-forcescore-ed}
   
-\EndFor  \label{algoline:global-knifepose-for-ed}
+\EndFor  \label{algoline:holding_global-knifepose-for-ed}
 
 \State $\equholdingpointset[fin] \gets P$ such that the value $\mathbb{S}[\equholdingpointset]$ is the maximum.
 
@@ -197,7 +197,7 @@ E_{\mathrm{tbl}} = \min(p_{1z},\ldots,p_{nz})
   \State \fix[$\mathbb{P}_\mathrm{out} \gets$ keys of the top $\lfloor rN\rfloor$ entries in $\mathbb{S}_\mathrm{geo}$]
   \State \fix[\textbf{return} $\mathbb{P}_\mathrm{out}$]
 \EndFunction\\
-\Function{Normalize}{$\{E_i\}$}  \label{algoline:normalize-func}
+\Function{Normalize}{$\{E_i\}$}  \label{algoline:holding_normalize-func}
 \State $N$: the number of elements in $\{E_i\}$
 \State $M\gets\max(E_1,\ldots,E_N)$
 \State $m\gets\min(E_1,\ldots,E_N)$
@@ -205,7 +205,7 @@ E_{\mathrm{tbl}} = \min(p_{1z},\ldots,p_{nz})
  \State $E\gets (E - m) / (M - m)$
 \EndFor
 \State \textbf{return} $\{E_i\}$
-\EndFunction  \label{algoline:normalize-func-ed}
+\EndFunction  \label{algoline:holding_normalize-func-ed}
 \end{algorithmic}
 \end{algorithm}
 
@@ -246,13 +246,13 @@ E_{\mathrm{pdis}} = -\min(\mathrm{Dist}(\equholdingpointset, \hat{\bm{n}}_{\math
     \State $w_\mathrm{pdir}, w_\mathrm{pdis}$: weights
     \For{$i\gets 1, N$}
         \State $E_{\mathrm{pdir,}i}\gets E_\mathrm{pdir}$ for $P_i$
-        \State $E_{\mathrm{pdis,}i}\gets E_\mathrm{pdis}$ for $P_i$ \label{algoline:CalDynamicScore-pos-score}
+        \State $E_{\mathrm{pdis,}i}\gets E_\mathrm{pdis}$ for $P_i$ \label{algoline:holding_CalDynamicScore-pos-score}
     \EndFor
-    \State $\{E_{\mathrm{pdir,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{pdir,}i}\}$} \label{algoline:score-pos-final-st}
+    \State $\{E_{\mathrm{pdir,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{pdir,}i}\}$} \label{algoline:holding_score-pos-final-st}
     \State $\{E_{\mathrm{pdis,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{pdis,}i}\}$}
     \For{$i\gets 1, N$}
         \State $S_{\mathrm{pos},i} \gets w_\mathrm{pdir} E_{\mathrm{pdir},i} + w_\mathrm{pdis} E_{\mathrm{pdis},i}$
-    \EndFor  \label{algoline:score-pos-final-ed}
+    \EndFor  \label{algoline:holding_score-pos-final-ed}
 
     \State \Return $\{S_{\mathrm{pos},i}\}$
 \EndFunction
@@ -374,7 +374,7 @@ e_{\mathrm{var}} = - \mathrm{Var}(\|\equfingerforce[1]\|, \|\equfingerforce[2]\|
     S = w_{\mathrm{mag}} \tilde{e}_{\mathrm{mag,}i} + w_{\mathrm{dir}} \tilde{e}_{\mathrm{dir,}i} + w_{\mathrm{var}} \tilde{e}_{\mathrm{var,}i}
     \label{equ:holding_force_local_score}
 \end{equation}
-これらのローカルスコア$S$と対応する生素点$\{e_{\mathrm{mag}}, e_{\mathrm{dir}}, e_{\mathrm{var}}\}$がリスト$L$に格納され（アルゴリズム\ref{algo:holding_filter_force}の\ref{algo:holding_filter_force_local_1}行），最高の$S$に対応する生素点がローカル段階の出力として返される（アルゴリズム\ref{algo:holding_filter_force}の\ref{algo:holding_filter_force_local_2}行）．
+これらのローカルスコア$S$と対応する生素点$\{e_{\mathrm{mag}}, e_{\mathrm{dir}}, e_{\mathrm{var}}\}$がリスト$L$に格納され（アルゴリズム\ref{algo:holding_filter_force}の\ref{algo:holding_force-local-norm-score-st}行），最高の$S$に対応する生素点がローカル段階の出力として返される（アルゴリズム\ref{algo:holding_filter_force}の\ref{algo:holding_force-local-norm-score-ed}行）．
 
 第二段階（グローバル評価）では，ローカル段階で選出された各{\nameholdingpointset}の生素点（$E_{\mathrm{mag}}$, $E_{\mathrm{dir}}$, $E_{\mathrm{var}}$）を{\namesearchspace}$\equsearchspace$全体で$[0,1]$に正規化し，重み付き和として$S_{\mathrm{dyn}}$を算出する．
 \begin{equation}
@@ -396,15 +396,15 @@ S_{\mathrm{dyn},i} = w_{\mathrm{mag}} \tilde{E}_{\mathrm{mag,}i} + w_{\mathrm{di
         \State $\quad \gets$ \Call {CalDynamicScoreEach}{$\bm{t}_\mathrm{k}, \equholdingpointset[i] $, $\Omega_{\mathrm{g}}$}
     \EndFor
     
-    \State \fix[$\{\tilde{E}_{\mathrm{mag,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{mag,}i}\}$} \label{algo:force-global-norm-score-st} ]
+    \State \fix[$\{\tilde{E}_{\mathrm{mag,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{mag,}i}\}$} \label{algo:holding_force-global-norm-score-st} ]
     \State \fix[$\{\tilde{E}_{\mathrm{dir,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{dir,}i}\}$}]
-    \State \fix[$\{\tilde{E}_{\mathrm{var,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{var,}i}\}$}] \label{algo:force-global-norm-score-ed}
+    \State \fix[$\{\tilde{E}_{\mathrm{var,}i}\}\gets$ \Call{Normalize}{$\{E_{\mathrm{var,}i}\}$}] \label{algo:holding_force-global-norm-score-ed}
     
     \For{$i\gets 1, N$}
         \State \fix[$S_{\mathrm{dyn},i} \gets w_\mathrm{mag} \tilde{E}_{\mathrm{mag,}i} + w_\mathrm{dir} \tilde{E}_{\mathrm{dir,}i} + w_\mathrm{var} \tilde{E}_{\mathrm{var,}i}$ ]
     \EndFor
     
-    \State \fix[\Return $\{S_{\mathrm{dyn,}i}\}$ \label{algoline:CalDynamicScore-all}]
+    \State \fix[\Return $\{S_{\mathrm{dyn,}i}\}$ \label{algoline:holding_CalDynamicScore-all}]
 \EndFunction
 
 \State 
@@ -462,7 +462,7 @@ S_{\mathrm{dyn},i} = w_{\mathrm{mag}} \tilde{E}_{\mathrm{mag,}i} + w_{\mathrm{di
 \subsection{把持点への手指配置}
 \label{subsec:holding_finger_placement}
 
-実験プラットフォームの詳細は第3章にて述べた通りであり，左腕には食材形状への適応性を重視した3軸2指サーボハンド（図\ref{fig:robot_hand}）を，右腕には包丁を固定するための平行グリッパを装着した．
+実験プラットフォームの詳細は第3章にて述べた通りであり，左腕には食材形状への適応性を重視した3軸2指サーボハンド（図\ref{fig:system:finger-hand}）を，右腕には包丁を固定するための平行グリッパを装着した．
 
 指ハンドの各指はz-y-y-tipの関節構成をとり，FUTABA RS405CBサーボ（最大トルク48.0\,$\mathrm{kgf \cdot cm}$，角度分解能0.1\,deg）により駆動される．{\namefingerpoint}$\equfingerpoint[][i]$から関節角$\bm{q}_i$への変換には，指関節のみのヤコビアン逆運動学を用いた．
 \begin{equation}

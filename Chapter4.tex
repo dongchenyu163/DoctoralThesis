@@ -1,5 +1,5 @@
 \chapter{アプローチの検証：皮むき作業}
-\label{chp:peeling}
+\label{ch:peeling}
 
 本章では，第\ref{ch:introduction}章で設定した第一の研究課題である皮むき動作を扱う．
 第\ref{ch:system}章で構築した3D点群モデル取得の共通基盤の上に，食材の皮むき動作を実現するための具体的なアルゴリズムと制御手法を述べる．
@@ -71,7 +71,7 @@
 ここで，一回皮むき動作とは，ピーラーを食材表面に接触させ，あらかじめ生成した軌跡に沿って移動させる処理である．
 食材の回転操作とは，一回皮むき動作の後に，次に剥くべき領域がピーラー側へ向くように食材を回転させる処理である．
 
-全体手順は以下のように整理できる（図\ref{fig:ch4_sequence}）．
+全体手順は以下のように整理できる（図\ref{fig:peeling_sequence}）．
 
 \begin{enumerate}
   \item 第3章の手順により得られた食材表面のRGB点群 $P_{\mathrm{all}}$ を入力する．
@@ -158,7 +158,7 @@ SII2021\cite{SII2021}の実験では，この閾値を0.3\,mmとした．この�
 $\mathcal{P}_{c2}$ は，回転軸 $\mathbf{v}_{\mathrm{rot}}$ を通り，その法線 $\mathbf{n}_{c2}$ が以下の条件を満たす平面として定義される．
 
 \begin{align}
-  \mathbf{n}_{c2} &= \mathbf{r} \times \mathbf{n}_p \label{eq:cut_plane_2}
+  \mathbf{n}_{c2} &= \mathbf{r} \times \mathbf{n}_p \label{eq:peeling_cut_plane_2}
 \end{align}
 
 ここで，$\mathbf{n}_p$ は以下の条件を満たすベクトルである．
@@ -175,7 +175,7 @@ $\mathcal{P}_{c2}$ は，回転軸 $\mathbf{v}_{\mathrm{rot}}$ を通り，そ�
 
 \begin{equation}
   \mathbf{v}_i \cdot \mathbf{n}_{c2} > 0
-  \label{eq:point_removal}
+  \label{eq:peeling_point_removal}
 \end{equation}
 
 ここで，$\mathbf{v}_i$ は世界座標系の原点から点群 $P_{\mathrm{all}}$ 中の点 $\mathbf{p}_i$ へ向かうベクトルである．
@@ -207,8 +207,8 @@ $\mathcal{P}_{c2}$ は，回転軸 $\mathbf{v}_{\mathrm{rot}}$ を通り，そ�
 \begin{enumerate}
   \item $\mathcal{P}_{c1}$ を，$\mathbf{v}_{\mathrm{rot}}$ を含み，$\mathcal{P}_T$ に垂直な平面として定義する．
   \item $P_{\mathrm{all}}$ から，$\mathcal{P}_{c1}$ への距離が閾値0.3\,mm以内の点を抽出し，断面輪郭 $L_c$ とする．
-  \item 式(\ref{eq:cut_plane_2})により $\mathcal{P}_{c2}$ の法線 $\mathbf{n}_{c2}$ を決定する．
-  \item 式(\ref{eq:point_removal})により $L_c$ から下側部分を除去し，到達可能軌跡 $L$（点群 $P_L$）を得る．
+  \item 式(\ref{eq:peeling_cut_plane_2})により $\mathcal{P}_{c2}$ の法線 $\mathbf{n}_{c2}$ を決定する．
+  \item 式(\ref{eq:peeling_point_removal})により $L_c$ から下側部分を除去し，到達可能軌跡 $L$（点群 $P_L$）を得る．
 \end{enumerate}
 
 このようにして得られた基準軌跡 $L$ は，食材の回転軸を含む断面輪郭のうち，ロボットアームがピーラーを安全に到達させられる上半分の曲線となる．
@@ -275,12 +275,12 @@ SII2021\cite{SII2021}の実験では，$\theta_{\mathrm{th}} = 30^\circ$ を閾�
 次に，$P_{\mathrm{rgb}}$ の各点の色情報をRGB色空間からHSV色空間に変換し，事前に定義された非皮領域（非皮領域）のHSV範囲に基づいて，非皮領域の点群を抽出する．
 この色範囲は人間が事前に指定する．
 抽出された非皮領域点群に対してクラスタリングを適用し，最大クラスタを非皮領域 $P_{\mathrm{cluster}}$ とする．
-各食材の非皮領域抽出に用いるHSV範囲の例を表\ref{tab:hsv_range}に示す．
+各食材の非皮領域抽出に用いるHSV範囲の例を表\ref{tab:peeling_hsv_range}に示す．
 
 \begin{table}[ht]
   \centering
   \caption{The HSV color range of the peeled area extraction for each food}
-  \label{tab:hsv_range}
+  \label{tab:peeling_hsv_range}
   \begin{tabular}{@{}lccc@{}}
     \toprule
     Food & H [0, 180] & S [0, 256] & V [0, 256] \\
@@ -308,7 +308,7 @@ SII2021\cite{SII2021}の実験では，$d = 1$\,mm とした．
 
 \begin{equation}
   \mathbf{n}_{\mathrm{avg}} = \frac{1}{N_{\mathrm{pe}}} \sum \mathbf{n}_{\mathrm{pe}}
-  \label{eq:avg_normal}
+  \label{eq:peeling_avg_normal}
 \end{equation}
 
 ここで，$N_{\mathrm{pe}}$ は境界近傍で用いた法線の数である．
@@ -325,7 +325,7 @@ SII2021\cite{SII2021}の実験では，$d = 1$\,mm とした．
   \item $P_{\mathrm{rgb}}$ をHSV色空間に変換し，事前定義された色範囲でフィルタリングして非皮領域点群 $P_{\mathrm{cluster}}$ を得る．
   \item $P_{\mathrm{cluster}}$ から，$x$ 座標と $z$ 座標がともに最大となる点 $\mathbf{p}_{\mathrm{pe}}$ を抽出する．
   \item $\mathbf{p}_{\mathrm{pe}}$ の $x$ 座標 $X_{\mathrm{pe}}$ を基準に，{元のRGB点群 $P_{\mathrm{rgb}}$} から $x$ 座標が $[X_{\mathrm{pe}}, X_{\mathrm{pe}} + d]$ の範囲の点群を抽出し，境界点群 $L_p$ とする．
-  \item $L_p$ 近傍の法線を式(\ref{eq:avg_normal})により平均し，$\mathbf{n}_{\mathrm{avg}}$ を得る．
+  \item $L_p$ 近傍の法線を式(\ref{eq:peeling_avg_normal})により平均し，$\mathbf{n}_{\mathrm{avg}}$ を得る．
   \item $\mathbf{n}_{\mathrm{avg}}$ と $\mathbf{v}_{\mathrm{ref}}$ のなす角 $\alpha$ を回転角として求める．
 \end{enumerate}
 
@@ -392,23 +392,23 @@ SII2021\cite{SII2021}は，単なる軌跡追従では皮むきが成立しな�
 
 \begin{equation}
   f_e = f_c - f_s
-  \label{eq:force_error}
+  \label{eq:peeling_force_error}
 \end{equation}
 
 この誤差 $f_e$ をゼロに収束させるように，接触方向（ツール座標系の $z$ 軸方向）の補正速度 $v_z$ を以下の式で決定する．
 
 \begin{equation}
   v_z = a\,|f_e|\,\left(\frac{1}{1 + e^{-b f_e}} - \frac{1}{2}\right)
-  \label{eq:vz}
+  \label{eq:peeling_vz}
 \end{equation}
 
 ここで，$a$ は力誤差 $f_e$ に対する感度を，$b$ は誤差がゼロ付近にある場合のデッドゾーン幅を表すパラメータである．
-式(\ref{eq:vz})の関数形は，基本的に $v_z$ と $f_e$ の間に線形に近い関係を持たせつつ，$f_e \approx 0$ 付近で不感帯を形成するように設計されている．
+式(\ref{eq:peeling_vz})の関数形は，基本的に $v_z$ と $f_e$ の間に線形に近い関係を持たせつつ，$f_e \approx 0$ 付近で不感帯を形成するように設計されている．
 この不感帯により，微小な力計測ノイズに対する敏感な速度変動が抑制される．
 
 \subsubsection{最低速度の設定}
 
-実装上の課題として，式(\ref{eq:vz})では $f_e$ がゼロに近づくにつれて $v_z$ もゼロに接近するため，出力速度がロボットの動作下限を下回り，誤差が完全に収束しない現象が生じうる．
+実装上の課題として，式(\ref{eq:peeling_vz})では $f_e$ がゼロに近づくにつれて $v_z$ もゼロに接近するため，出力速度がロボットの動作下限を下回り，誤差が完全に収束しない現象が生じうる．
 この問題を回避するため，出力速度の絶対値に最低速度 $v_{\mathrm{lim}}$ を設定する．
 
 \begin{equation}
@@ -417,7 +417,7 @@ SII2021\cite{SII2021}は，単なる軌跡追従では皮むきが成立しな�
     v_z, & \text{if}\; v_z = 0 \\[4pt]
     \mathrm{sign}(v_z)\,\max(|v_z|, v_{\mathrm{lim}}), & \text{otherwise}
   \end{cases}
-  \label{eq:vz_limit}
+  \label{eq:peeling_vz_limit}
 \end{equation}
 
 ここで，$\mathrm{sign}(v_z) = v_z / |v_z|$ は $v_z$ の符号を表す．
@@ -426,19 +426,19 @@ SII2021\cite{SII2021}は，単なる軌跡追従では皮むきが成立しな�
 
 \begin{equation}
   v_i = k\,(x_{i,\mathrm{target}} - x_i),\quad i \in \{x, y, \alpha, \beta, \gamma\}
-  \label{eq:position_control}
+  \label{eq:peeling_position_control}
 \end{equation}
 
 ここで，$x_{i,\mathrm{target}}$ は目標位置・姿勢，$x_i$ は現在の位置・姿勢，$k$ は比例ゲインである．
 
 \subsubsection{制御パラメータ}
 
-SII2021\cite{SII2021}の実験で用いられた力覚フィードバック制御のパラメータを表\ref{tab:force_params}に示す．
+SII2021\cite{SII2021}の実験で用いられた力覚フィードバック制御のパラメータを表\ref{tab:peeling_force_params}に示す．
 
 \begin{table}[ht]
   \centering
   \caption{The parameters of force feedback control}
-  \label{tab:force_params}
+  \label{tab:peeling_force_params}
   \begin{tabular}{@{}lcl@{}}
     \toprule
     Parameters & Notation & Value \\
@@ -477,14 +477,14 @@ SII2021\cite{SII2021}の実験で用いられた力覚フィードバック制�
 
 \begin{equation}
   r_s = \frac{N_{\mathrm{pe}}}{N_{\mathrm{side}}}
-  \label{eq:stop_ratio}
+  \label{eq:peeling_stop_ratio}
 \end{equation}
 
 この値が閾値 $r_{\mathrm{th}}$ 以上となった場合，当該側面の皮むきは十分に完了したと判断し，皮むき作業全体を終了する．
 
 \begin{equation}
   r_s \ge r_{\mathrm{th}}
-  \label{eq:stop_condition}
+  \label{eq:peeling_stop_condition}
 \end{equation}
 
 SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
@@ -499,7 +499,7 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
   \item \ref{sec:peeling_one_peel_motion}，\ref{sec:peeling_force_feedback}項の手順により，各セグメントに沿って力覚フィードバック制御を用いながら皮むき動作を実行する（一回皮むき動作）．
   \item ピーラー側の腕を食材の上方へ移動させ，上のRGB点群を取得する．
   \item \ref{sec:peeling_rotation_calc}項の手順により，回転角 $\alpha$ を計算し，食材を回転させる（食材の回転操作）．
-  \item 式(\ref{eq:stop_condition})により終了判定を行う．条件を満たさない場合は，ステップ1へ戻り，次の反復を開始する．
+  \item 式(\ref{eq:peeling_stop_condition})により終了判定を行う．条件を満たさない場合は，ステップ1へ戻り，次の反復を開始する．
   \item 条件を満たした場合，皮むき作業を終了する．
 \end{enumerate}
 
@@ -507,7 +507,7 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
     \centering
     \includegraphics[width=0.7\textwidth]{fig/chp_peeling/sequence.png}
     \caption{The sequence of the proposed method. Note that if the stop condition is not satisfied, the procedure returns to step 2 while the step 8 was done.}
-    \label{fig:ch4_sequence}
+    \label{fig:peeling_sequence}
 \end{figure*}
 
 \section{実験}
@@ -524,7 +524,7 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 それぞれの食材は，以下の観点から選定した．
 
 \begin{enumerate}
-  \item \textbf{りんご}：表面曲率が大きく，法線方向の変化が顕著な食材である．幾何情報に基づく軌跡生成と軌跡分割の有効性を確認する対象となる．実験では，大きさの異なる3種類（大・中・小）を各3個，計9個を用いた．りんごのサイズを表\ref{tab:apple_sizes}に示す．
+  \item \textbf{りんご}：表面曲率が大きく，法線方向の変化が顕著な食材である．幾何情報に基づく軌跡生成と軌跡分割の有効性を確認する対象となる．実験では，大きさの異なる3種類（大・中・小）を各3個，計9個を用いた．りんごのサイズを表\ref{tab:peeling_apple_sizes}に示す．
 
   \item \textbf{きゅうり，なす}：表面曲率が比較的小さく，法線変化が緩やかな食材である．軌跡分割後のセグメント実行と接触維持の安定性を確認する対象となる．各1個を用いた．
   
@@ -536,7 +536,7 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 \begin{table}[ht]
   \centering
   \caption{The size of apple for experiment.}
-  \label{tab:apple_sizes}
+  \label{tab:peeling_apple_sizes}
   \begin{tabular}{@{}lcc@{}}
     \toprule
     Apple & Width [mm] & Length [mm] \\
@@ -592,12 +592,12 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
     \centering
     \includegraphics[width=0.7\textwidth]{fig/chp_peeling/result.png}
     \caption{The result of peeling experiment．Top left: Apples (large, medium, small); Top right: Cucumbers; Bottom left: Eggplants; Bottom middle: Potatoes; Bottom right: Carrots.}
-    \label{fig:ch4_result}
+    \label{fig:peeling_result}
 \end{figure}
 
 \subsubsection{りんご}
 
-りんご9個（大3，中3，小3）の皮むき実験結果を図\ref{fig:ch4_result}と表\ref{tab:apple_result}に示す．
+りんご9個（大3，中3，小3）の皮むき実験結果を図\ref{fig:peeling_result}と表\ref{tab:peeling_apple-result}に示す．
 
 \begin{table}[t]
 \centering
@@ -610,7 +610,7 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 	2                       & 79.83          & 84.25           & 90.93          \\
 	3                       & 82.69          & 84.11           & 88.62          \\ \hline
 \end{tabular}
-\label{tab:apple-result}
+\label{tab:peeling_apple-result}
 \end{table}
 
 りんごの結果から，全ての試行で皮むき率78\%以上を達成し，提案手法が曲率の大きな食材に対しても有効であることが確認された．
@@ -619,7 +619,7 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 
 \subsubsection{きゅうり，なす}
 
-きゅうり，なすの皮むき実験結果を図\ref{fig:ch4_result}と表\ref{tab:cucumber_eggplant_result}に示す．
+きゅうり，なすの皮むき実験結果を図\ref{fig:peeling_result}と表\ref{tab:peeling_others-result}に示す．
 
 \begin{table}[t]
 \centering
@@ -630,7 +630,7 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 	& Cucumber    & Eggplant    & Potato    & Carrot    \\ \hline
 	1                       & 94.31       & 90.23       & 88.72     & 95.00     \\ \hline
 \end{tabular}
-\label{tab:others-result}
+\label{tab:peeling_others-result}
 \end{table}
 
 きゅうり，なすのような表面の法線方向の変化が小さい食材では，りんごよりも法線のばらつきが小さいため，90\%以上の高い皮むき率が達成された．
@@ -642,7 +642,7 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 \subsubsection{じゃがいも}
 
 じゃがいも，表面に凹凸があり，皮と中身の色が近いという二重の困難を有する食材である．
-じゃがいもの結果は図\ref{fig:ch4_result}に示した．
+じゃがいもの結果は図\ref{fig:peeling_result}に示した．
 88.72\%の皮むき率が達成されたが，芽の部分やくぼんだ部分では皮むきが十分に行われなかった．
 これらの領域は，局所的に表面法線が大きく変化するため，直線セグメントによる近似では追従しきれなかったことが原因として考えられる．
 
@@ -655,18 +655,18 @@ SII2021\cite{SII2021}の実験では，$r_{\mathrm{th}} = 0.9$ とした．
 そのため，\ref{sec:peeling_rotation_calc}の回転角計算に代えて，固定回転角 $\alpha = 20^\circ$ を用いた．
 
 皮むき率の評価も画像処理による自動抽出が困難であったため，目視により推定した結果，約95\%の皮むき率が得られた．
-にんじんの結果は図\ref{fig:ch4_result}に示した．
+にんじんの結果は図\ref{fig:peeling_result}に示した．
 固定回転角を用いた場合でも高い皮むき率が達成されたことは，$\alpha = 20^\circ$ が他の食材の回転操作回数（17〜19回）から導かれた経験的に妥当な値であることを示している．
 一方で，固定回転角を用いる手法は，食材の形状や一回皮むき動作で実際に剥ける幅の変動に適応できないため，より精緻な境界認識手法の開発が今後の課題として残る．
 
 \subsubsection{食材回転操作の回数}
 
-各食材の皮むき作業における回転操作の回数を表\ref{tab:rotation_times}に示す．
+各食材の皮むき作業における回転操作の回数を表\ref{tab:peeling_rotation_times}に示す．
 
 \begin{table}[ht]
   \centering
   \caption{The times of rotation motion for each food}
-  \label{tab:rotation_times}
+  \label{tab:peeling_rotation_times}
   \begin{tabular}{@{}lcc@{}}
     \toprule
     Food &  & Rotation Times \\
@@ -747,7 +747,7 @@ Apple & Medium 2 & 19 \\
 
   \item \textbf{幾何情報に基づく軌跡生成}：食材の回転軸を含み作業台平面に垂直な切断平面 $\mathcal{P}_{c1}$ により断面輪郭 $L_c$ を抽出し，到達可能性判定用の切断平面 $\mathcal{P}_{c2}$ により下側部分を除去することで，到達可能な基準軌跡 $L$ を生成した．さらに，表面法線の変化に基づいて軌跡を複数のセグメント $s_j$ に分割し，ピーラー刃の受動的回転機能と相まって，実機での安定な直線実行を可能とした．
 
-  \item \textbf{力覚フィードバック制御の統合}：軌跡追従のための位置制御と，接触維持のための力制御を統合したハイブリッド制御構造を採用した．力制御には，目標接触力 $f_c$ と実測値 $f_s$ の誤差に基づく速度補正式（式(\ref{eq:vz})）を用い，最低速度 $v_{\mathrm{lim}}$ の設定により誤差収束の停滞を防止した．これにより，SII2021\cite{SII2021}が指摘する二つの問題——表面軌跡と実切込深さのずれ，および点群計測誤差——の両方に対してロバストな皮むき動作が実現された．
+  \item \textbf{力覚フィードバック制御の統合}：軌跡追従のための位置制御と，接触維持のための力制御を統合したハイブリッド制御構造を採用した．力制御には，目標接触力 $f_c$ と実測値 $f_s$ の誤差に基づく速度補正式（式(\ref{eq:peeling_vz})）を用い，最低速度 $v_{\mathrm{lim}}$ の設定により誤差収束の停滞を防止した．これにより，SII2021\cite{SII2021}が指摘する二つの問題——表面軌跡と実切込深さのずれ，および点群計測誤差——の両方に対してロバストな皮むき動作が実現された．
 
   \item \textbf{非皮領域に基づく回転角の計算}：RGB情報とHSV色空間を用いて非皮領域を抽出し，その境界 $L_p$ 近傍の平均法線 $\mathbf{n}_{\mathrm{avg}}$ と基準ベクトル $\mathbf{v}_{\mathrm{ref}}$ のなす角から次回の回転角 $\alpha$ を計算する手法を提案した．この手法により，食材の曲率に応じた適応的な回転角の決定が可能となった．色認識が困難な食材に対しては，固定回転角 $\alpha = 20^\circ$ による代替手法を併用した．
 

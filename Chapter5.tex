@@ -73,10 +73,7 @@
 \subsection{提案手法の概要}
 
 上記の2つの課題に対し，注ぎ作業には注ぐ容器と注ぎ先容器の2つの容器が関連することから，
-本研究ではそれぞれの容器に着目した2つの方法論を提案する
-（図\ref{fig:pour_methods_overview}）．
-% ここではまだ具体的な図はないが，後の実験で示す容器の図を先に配置することも可能．
-% この見出しに対応する図が IROS2019 にはないため，必要に応じて追加．
+本研究ではそれぞれの容器に着目した2つの方法論を提案する．
 
 \begin{enumerate}
   \item \textbf{手法1：注ぎ先容器に注目} 
@@ -252,7 +249,7 @@ RANSAC による平面検出を用いれば，液面以外の構造（容器側�
 		Black circles mark the endpoints that need to be found.
 		Points surrounded by orange circles are the results of \cite{PCL-Convex}, and these points are stored in an ordered array (marked with an orange broken line).
 	}
-	\label{fig:pour-edge-1}
+	\label{fig:pour_pour-edge-1}
 \end{figure}
 
 \begin{figure}[t]
@@ -266,7 +263,7 @@ RANSAC による平面検出を用いれば，液面以外の構造（容器側�
 		Deep blue crosses mark the inner points of the cross-sectional shape.
 		Cyan crosses mark the inner points that will be projected onto the line defined by the two red crosses.
 		Two points surrounded by deep green circles are the resulting endpoints.}
-	\label{fig:pour-edge-2}
+	\label{fig:pour_pour-edge-2}
 \end{figure}
 % --------------------------------------------------------------------------------
 
@@ -613,7 +610,7 @@ $D_{\mathrm{error}}$ は注いだ体積の増加速度（体積誤差の時間�
 \begin{table}[h]
 	\vspace{3mm}
 	\caption{The average (Avg.) and standard deviation (S.d.) of errors in volume calculation}
-	\label{tab:volume-calculation}
+	\label{tab:pour_volume-calculation}
 	\centering
 	\begin{tabular}{cccc}
 		\toprule
@@ -741,17 +738,17 @@ $x$ 軸回りに回転させ，各角度における注いだ体積を秤で計�
 		\centering
 		\includegraphics[width=1\textwidth]{fig/chp_pouring/Method2-ST-Cup2-Error.pdf}
 		\caption{Errors with Cup~2.}
-		\label{fig:method-exp1.sub1}
+		\label{fig:pour_method-exp1.sub1}
 	\end{subfigure}
 	\hspace{1cm}
 	\begin{subfigure}[t]{.45\textwidth}
 		\centering
 		\includegraphics[width=1\textwidth]{fig/chp_pouring/Method2-ST-Cup3-Error.pdf}
 		\caption{Errors with Cup~3}
-		\label{fig:method-exp1.sub2}
+		\label{fig:pour_method-exp1.sub2}
 	\end{subfigure}
-	\caption{Influence of Surface Tension on Method 2. In Figure \ref{fig:method-exp1.sub1}, the blue, orange, and greeb lines show the results of Cup~2 with initial volumes of 30, 60, and 90\,ml, respectively. Cup~3 is 22, 44, and 66\,ml (Figure \ref{fig:method-exp1.sub2}). The purple line shows the result with no surface tension and Cup~2 with an initial volume of 90\,ml.}
-	\label{fig:method-exp1}
+	\caption{Influence of Surface Tension on Method 2. In Figure \ref{fig:pour_method-exp1.sub1}, the blue, orange, and greeb lines show the results of Cup~2 with initial volumes of 30, 60, and 90\,ml, respectively. Cup~3 is 22, 44, and 66\,ml (Figure \ref{fig:pour_method-exp1.sub2}). The purple line shows the result with no surface tension and Cup~2 with an initial volume of 90\,ml.}
+	\label{fig:pour_method-exp1}
 \end{figure*}
 % ------------------------------------------------------------------------------------
 
