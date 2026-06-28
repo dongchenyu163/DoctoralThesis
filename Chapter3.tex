@@ -364,7 +364,7 @@ RTC\_PointCloudProcessのポート構成を図\ref{fig:RTCPointCloudProcess}に�
 力覚センサのデータ取得もRTC\_PA10経由からPythonシリアル通信へ変更した．
 ただし，点群処理パイプライン自体は全研究で同一である（\ref{sec:pointcloud_pipeline}節参照）．
 
-\subsubsection{システムの構成の差分}
+\subsection{第三研究における構成の差分}
 
 以上で述べた三つの研究，および第三研究の前後半におけるシステム構成の差分を表\ref{tab:system_diff}に整理する．
 最下行に示す通り，点群処理パイプラインの本質は全構成で同一である．
@@ -492,6 +492,7 @@ RTC\_PointCloudProcessのポート構成を図\ref{fig:RTCPointCloudProcess}に�
 
 
 
+
 % ============================================================
 \section{3D点群モデル取得の概要}
 
@@ -524,8 +525,8 @@ RTC\_PointCloudProcessのポート構成を図\ref{fig:RTCPointCloudProcess}に�
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.6\linewidth]{fig/chp3/pointcloud_progress.png}
-  \caption{3D点群モデル取得の共通処理パイプライン}
+  \includegraphics[width=0.6\linewidth]{fig/chp3/chp3_algo_flowchart.drawio.pdf}
+  \caption{The pipeline of point cloud processing}
   \label{fig:pipeline}
 \end{figure}
 
@@ -810,12 +811,11 @@ MLS平滑化により推定された法線ベクトル $\{ \bm{n}_i \}$ は，�
 
 重心位置は，把持の力学的安定性評価における重要な入力であり，特に食材把持タスクでは，食品の密度が比較的均一であるとの仮定の下，幾何学的重心を質量中心の近似値として使用する\cite{SICE2025}．
 
-\subsubsection{表面領域と指先位置候補}
-
-点群モデルから，物体表面の各点を指先把持位置の候補として利用する．
-具体的には，$\mathcal{P}_{\mathrm{obj}}$ の各点 $\bm{p}_i$ を指先位置候補とし，対応する法線ベクトル $\bm{n}_i$ を指先の接近方向として扱う．
-これにより，多数の把持候補（最大で $K = |\mathcal{P}_{\mathrm{obj}}|$ 個）が生成される．
-計算効率の観点から，事前に点群をダウンサンプリングして候補点数を制限する（例：SICE2025の実験では約150〜200点に制限\cite{SICE2025}）．
+% \subsubsection{表面領域と指先位置候補}
+% 点群モデルから，物体表面の各点を指先把持位置の候補として利用する．
+% 具体的には，$\mathcal{P}_{\mathrm{obj}}$ の各点 $\bm{p}_i$ を指先位置候補とし，対応する法線ベクトル $\bm{n}_i$ を指先の接近方向として扱う．
+% これにより，多数の把持候補（最大で $K = |\mathcal{P}_{\mathrm{obj}}|$ 個）が生成される．
+% 計算効率の観点から，事前に点群をダウンサンプリングして候補点数を制限する（例：SICE2025の実験では約150〜200点に制限\cite{SICE2025}）．
 
 \subsubsection{後続章における利用}
 
