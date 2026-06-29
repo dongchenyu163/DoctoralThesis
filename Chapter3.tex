@@ -82,6 +82,101 @@
 取得した点群は，各時刻におけるロボット姿勢とカメラの取り付け関係に基づいて世界座標系へ変換し，合成した3Dモデルとして利用する．
 この3Dモデルは，注ぐ動作では容器内部形状の推定と容積計算に，皮むき動作では食材表面形状の取得と工具軌道生成に，切断時把持では接触候補点の生成と把持安定性評価に用いられる．
 
+
+
+\subsection{カメラキャリブレーション}
+\label{sec:system:camera_calibration}
+
+RGB-D カメラから取得した点群を多視点で合成するためには，各撮影時のカメラ姿勢を世界座標系で表す必要がある．
+そのため，本研究では，カメラ内部パラメータに加え，カメラとロボット手先の相対姿勢，左右アームのベース座標系間の変換，および1軸サーボカメラアームの角度依存変換を事前に同定した．
+カメラ内部パラメータは，キャリブレーションボードを用いた通常のカメラキャリブレーションにより取得し，以下では点群の座標変換に直接関係する外部パラメータについて述べる．
+
+\paragraph{手先固定型カメラと双腕座標系のキャリブレーション}
+\label{sec:system:hand_eye}
+
+手先固定型カメラを用いる構成では，手先座標系 $\Sigma_H$ に対するカメラ座標系 $\Sigma_C$ の固定変換 ${}^{H}\bm{T}_{C}$ をハンドアイキャリブレーションにより求めた．
+具体的には，ChArUco ボードを作業空間内に静置し，ロボット手先を複数姿勢に移動させながらボードを撮影した．
+各画像から得られるボードとカメラの相対姿勢，およびロボットの順運動学から得られる手先姿勢を用いて，OpenCV の \texttt{calibrateRobotWorldHandEye} により ${}^{H}\bm{T}_{C}$ を推定した．
+得られた変換は環境設定ファイルに保存し，実行時にはロボットの手先姿勢と合成してカメラ座標系の点群を世界座標系へ変換する．
+
+また，双腕ロボットでは左右アームのベース座標系を統一する必要がある．
+本論文では左アームのベース座標系を世界座標系 $\Sigma_W$ として定義し，同一の ChArUco ボードを左右アームから観測することで，右アームのベース座標系 $\Sigma_{B_R}$ から左アームのベース座標系 $\Sigma_{B_L}$ への変換を求めた．
+左右のハンドアイキャリブレーションから得られるボード姿勢をそれぞれ ${}^{B_L}\bm{T}_{\mathrm{cb}}$，${}^{B_R}\bm{T}_{\mathrm{cb}}$ とすると，ベース座標系間の変換は次式で表される．
+
+\begin{equation}
+  {}^{B_L}\bm{T}_{B_R}
+  =
+  {}^{B_L}\bm{T}_{\mathrm{cb}}
+  \left({}^{B_R}\bm{T}_{\mathrm{cb}}\right)^{-1}
+  \label{eq:system:base_to_base}
+\end{equation}
+
+これにより，左右のカメラで取得した点群，および各アームで計算された操作点を，同一の世界座標系上で扱うことが可能となる．
+
+\paragraph{1軸サーボカメラアームのキャリブレーション}
+\label{sec:system:servo_cam_calib}
+
+DENSO VS-050 を用いた把持実験では，ロボットの可動範囲の制約を補うため，RGB-D カメラを1軸サーボアームに取り付けた（図\ref{fig:system:robot_camera_arm}）．
+この構成では，サーボ角 $\theta$ に応じてカメラ姿勢が変化するため，固定値としての ${}^{H}\bm{T}_{C}$ ではなく，角度依存の外部パラメータを計算する必要がある．
+
+本研究では，サーボカメラアームを1自由度の回転関節としてモデル化した．
+ツール座標系 $\Sigma_{\mathrm{tool}}$ からカメラ座標系 $\Sigma_C$ への変換は，サーボ関節座標系 $\Sigma_J$ を介して次式で表される．
+
+\begin{equation}
+  {}^{\mathrm{tool}}\bm{T}_{C}(\theta)
+  =
+  {}^{\mathrm{tool}}\bm{T}_{J}
+  \begin{bmatrix}
+    R(\bm{a},\,\theta+\theta_0) & \bm{0} \\
+    \bm{0}^{\top} & 1
+  \end{bmatrix}
+  {}^{J}\bm{T}_{C}
+  \label{eq:system:servo_camera_model}
+\end{equation}
+
+ここで，$\bm{a}$ はサーボ関節の回転軸，$\theta_0$ はサーボ角の零点ずれを表すオフセット角である．
+また，${}^{\mathrm{tool}}\bm{T}_{J}$ はツール座標系からサーボ関節座標系への固定変換，${}^{J}\bm{T}_{C}$ はサーボ関節座標系からカメラ座標系への固定変換である．
+
+これらのパラメータは，複数のサーボ角において通常のハンドアイキャリブレーションを行い，各角度で得られたカメラ姿勢と式(\ref{eq:system:servo_camera_model})の予測値が最も一致するように非線形最小二乗法で推定した．
+推定された主なパラメータを表\ref{tab:system:servo_calib_result}に示す．
+なお，表には解釈しやすいように回転軸，角度オフセット，および固定変換の並進成分のみを示すが，実行時には回転成分を含む全パラメータを用いる．
+
+\begin{table}[t]
+  \centering
+  \caption{Calibration results for the one-axis servo camera arm.}
+  \label{tab:system:servo_calib_result}
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    \textbf{Parameter} & \textbf{Value} \\
+    \midrule
+    Rotation axis $\bm{a}$ & $[-0.1341,\ 0.9069,\ -0.3993]^{\top}$ \\
+    Servo angle offset $\theta_0$ & $90.0^{\circ}$ \\
+    Translation of ${}^{\mathrm{tool}}\bm{T}_{J}$ [mm] & $[-28.8,\ 3.5,\ -83.8]^{\top}$ \\
+    Translation of ${}^{J}\bm{T}_{C}$ [mm] & $[-141.1,\ -15.0,\ -105.5]^{\top}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+離散角における観測値とモデル予測値を比較したところ，回転誤差は平均 $0.05^{\circ}$，並進誤差は $0.5$\,mm 以内であった．
+したがって，式(\ref{eq:system:servo_camera_model})により，任意のサーボ角におけるカメラ姿勢を十分な精度で推定できることを確認した．
+
+実行時には，現在のサーボ角 $\theta$ から ${}^{\mathrm{tool}}\bm{T}_{C}(\theta)$ を計算し，ロボットの順運動学により得られる手先姿勢と合成することで，世界座標系におけるカメラ姿勢を求める．
+
+\begin{equation}
+  {}^{W}\bm{T}_{C}(\theta)
+  =
+  {}^{W}\bm{T}_{H}
+  {}^{H}\bm{T}_{\mathrm{tool}}
+  {}^{\mathrm{tool}}\bm{T}_{C}(\theta)
+  \label{eq:system:world_camera_servo}
+\end{equation}
+
+以上のキャリブレーションにより，固定カメラ構成および1軸サーボカメラアーム構成のいずれにおいても，RGB-D カメラで取得した点群を世界座標系へ変換し，多視点点群として統合できる．
+
+
+
+
+
 \subsection{エンドエフェクタ設計}
 \label{sec:system:hardware:end-effector}
 
