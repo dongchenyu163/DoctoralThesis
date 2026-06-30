@@ -24,7 +24,14 @@
 \subsection{ロボットシステム}
 \label{sec:system:hardware:robot-system}
 
+
 \paragraph{双腕ロボット}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{fig/chp3/chp3_old_robot_coordinate.drawio.png}
+    \caption{The coordinate system of PA10-7C.}
+    \label{fig:system:robot-env-pa10}
+\end{figure}
 
 実験には，三菱重工製の7自由度マニピュレータ PA10-7C を2台用いた（図\ref{fig:system:robot-env-pa10}）．
 両アームは卓上作業に適するよう床面から約700\,mmの高さに設置し，各アームのベース座標系の原点は各アームの底の中央に設定した．
@@ -84,17 +91,76 @@
 
 
 
-\subsection{カメラキャリブレーション}
+\subsection{座標系定義とカメラキャリブレーション}
 \label{sec:system:camera_calibration}
+
+%%%%%
+% \subsection{座標系定義とカメラキャリブレーション}
+\label{sec:system:pointcloud:acquisition:calibration}
+
+\paragraph{座標系定義}
+\label{sec:system:hardware:coordinate-system}
+
+各軸の向きはロボット前方を$x$軸，ロボットから見て左方向を$y$軸，鉛直上方を$z$軸とした．
+
+双腕共同作業を統一的に記述するため，世界座標系を定義した．
+世界座標系の原点は左アームのベース座標系と一致させ，各軸の向きも左アームのベース座標系と同様に設定した．
+回転の表現には$x$-$y$-$z$軸周りのオイラー角を用い，各回転角度を$\alpha,\beta,\gamma$と表す．プラス回転方向は各回転軸に対して逆時計回りとした．
+
+また，各アームがお互いの動作を妨害せずに共同作業を可能とするため，両アームのベース座標系間の距離を$Y$軸方向に804\,mmとした．
+% Relative base transforms:
+% robot.denso.middle.base -> robot.denso.right.base (XYZABC, ABC in deg, Euler order XYZ):
+%   [0.433713, 0.759744, 0.064421, 1.607230, -0.778746, -92.196446]
+% robot.denso.right.base -> robot.denso.middle.base (XYZABC, ABC in deg, Euler order XYZ):
+%   [0.777336, -0.404764, -0.037188, -0.716564, -1.635894, 92.197139]
+
+
+\paragraph{座標系の定義}
+%%%%%%%\paragraph{座標系定義}
+
+本システムでは，以下の座標系を定義する：
+
+\begin{enumerate}
+  \item \textbf{世界座標系} $\Sigma_W$：ロボットベース座標系を原点とし，全点群の合成先となる基準座標系．
+  \item \textbf{カメラ座標系} $\Sigma_C$：RGB-Dカメラの光学中心を原点とし，カメラの光学軸を$z$軸とする座標系．
+  \item \textbf{ロボット手先座標系} $\Sigma_H$：ロボットアームの手首先端に固定された座標系．
+\end{enumerate}
+
+
+カメラ座標系 $\Sigma_C$ で得られた点群は，以下の変換を経て世界座標系 $\Sigma_W$ へ変換される：
+
+\begin{equation}
+  {}^{W}\bm{p} = {}^{W}\bm{T}_{H} \cdot {}^{H}\bm{T}_{C} \cdot {}^{C}\bm{p}
+  \label{eq:system:transform_chain}
+\end{equation}
+
+ここで，${}^{W}\bm{T}_{H}$ はロボットの順運動学から得られる手先座標系から世界座標系への同次変換行列，${}^{H}\bm{T}_{C}$ は手先座標系に対するカメラの取り付け位置姿勢（外部パラメータ），${}^{C}\bm{p}$ はカメラ座標系における点の位置ベクトルである．
+
+\paragraph{カメラキャリブレーションと外部パラメータ}
+
+RGB-Dカメラの内部パラメータ（焦点距離 $f_x, f_y$，光学中心 $c_x, c_y$，歪み係数）は，予めチェッカーボードを用いた標準的なカメラキャリブレーションにより取得する．
+
+外部パラメータ ${}^{H}\bm{T}_{C}$ は，カメラの手先への取り付け位置姿勢を表し，以下の手順で同定する：
+
+\begin{enumerate}
+  \item ロボット手先に固定されたカメラで，既知の3次元位置にあるキャリブレーションマーカを複数姿勢から観測する．
+  \item 各観測において，カメラ座標系におけるマーカ位置と世界座標系におけるマーカ位置の対応から，Hand-Eyeキャリブレーション問題として定式化する．
+  \item 最小二乗法により ${}^{H}\bm{T}_{C}$ を推定する．
+\end{enumerate}
+
+本論文の実験環境では，事前キャリブレーションにより外部パラメータを一度だけ同定し，実験中は同一値を用いた．
+%%%%%\label{sec:system:pointcloud:acquisition:calibration}
+
+
 
 RGB-D カメラから取得した点群を多視点で合成するためには，各撮影時のカメラ姿勢を世界座標系で表す必要がある．
 そのため，本研究では，カメラ内部パラメータに加え，カメラとロボット手先の相対姿勢，左右アームのベース座標系間の変換，および1軸サーボカメラアームの角度依存変換を事前に同定した．
 カメラ内部パラメータは，キャリブレーションボードを用いた通常のカメラキャリブレーションにより取得し，以下では点群の座標変換に直接関係する外部パラメータについて述べる．
 
-\paragraph{手先固定型カメラと双腕座標系のキャリブレーション}
+\paragraph{ハンドアイキャリブレーション}
 \label{sec:system:hand_eye}
 
-手先固定型カメラを用いる構成では，手先座標系 $\Sigma_H$ に対するカメラ座標系 $\Sigma_C$ の固定変換 ${}^{H}\bm{T}_{C}$ をハンドアイキャリブレーションにより求めた．
+手先に固定したカメラを用いる構成では，手先座標系 $\Sigma_H$ に対するカメラ座標系 $\Sigma_C$ の固定変換 ${}^{H}\bm{T}_{C}$ をハンドアイキャリブレーションにより求めた．
 具体的には，ChArUco ボードを作業空間内に静置し，ロボット手先を複数姿勢に移動させながらボードを撮影した．
 各画像から得られるボードとカメラの相対姿勢，およびロボットの順運動学から得られる手先姿勢を用いて，OpenCV の \texttt{calibrateRobotWorldHandEye} により ${}^{H}\bm{T}_{C}$ を推定した．
 得られた変換は環境設定ファイルに保存し，実行時にはロボットの手先姿勢と合成してカメラ座標系の点群を世界座標系へ変換する．
@@ -116,7 +182,7 @@ RGB-D カメラから取得した点群を多視点で合成するためには�
 \paragraph{1軸サーボカメラアームのキャリブレーション}
 \label{sec:system:servo_cam_calib}
 
-DENSO VS-050 を用いた把持実験では，ロボットの可動範囲の制約を補うため，RGB-D カメラを1軸サーボアームに取り付けた（図\ref{fig:system:robot_camera_arm}）．
+DENSO VS-050 （詳細は構成変更の\ref{sec:system:configuration-changes:hardware}節）では，ロボットの可動範囲の制約を補うため，RGB-D カメラを1軸サーボアームに取り付けた（図\ref{fig:system:robot_camera_arm}）．
 この構成では，サーボ角 $\theta$ に応じてカメラ姿勢が変化するため，固定値としての ${}^{H}\bm{T}_{C}$ ではなく，角度依存の外部パラメータを計算する必要がある．
 
 本研究では，サーボカメラアームを1自由度の回転関節としてモデル化した．
@@ -127,35 +193,17 @@ DENSO VS-050 を用いた把持実験では，ロボットの可動範囲の制�
   =
   {}^{\mathrm{tool}}\bm{T}_{J}
   \begin{bmatrix}
-    R(\bm{a},\,\theta+\theta_0) & \bm{0} \\
+    R(\bm{a},\,\theta) & \bm{0} \\
     \bm{0}^{\top} & 1
   \end{bmatrix}
   {}^{J}\bm{T}_{C}
   \label{eq:system:servo_camera_model}
 \end{equation}
 
-ここで，$\bm{a}$ はサーボ関節の回転軸，$\theta_0$ はサーボ角の零点ずれを表すオフセット角である．
+ここで，$\bm{a}$ はサーボ関節の回転軸．
 また，${}^{\mathrm{tool}}\bm{T}_{J}$ はツール座標系からサーボ関節座標系への固定変換，${}^{J}\bm{T}_{C}$ はサーボ関節座標系からカメラ座標系への固定変換である．
 
 これらのパラメータは，複数のサーボ角において通常のハンドアイキャリブレーションを行い，各角度で得られたカメラ姿勢と式(\ref{eq:system:servo_camera_model})の予測値が最も一致するように非線形最小二乗法で推定した．
-推定された主なパラメータを表\ref{tab:system:servo_calib_result}に示す．
-なお，表には解釈しやすいように回転軸，角度オフセット，および固定変換の並進成分のみを示すが，実行時には回転成分を含む全パラメータを用いる．
-
-\begin{table}[t]
-  \centering
-  \caption{Calibration results for the one-axis servo camera arm.}
-  \label{tab:system:servo_calib_result}
-  \begin{tabular}{@{}ll@{}}
-    \toprule
-    \textbf{Parameter} & \textbf{Value} \\
-    \midrule
-    Rotation axis $\bm{a}$ & $[-0.1341,\ 0.9069,\ -0.3993]^{\top}$ \\
-    Servo angle offset $\theta_0$ & $90.0^{\circ}$ \\
-    Translation of ${}^{\mathrm{tool}}\bm{T}_{J}$ [mm] & $[-28.8,\ 3.5,\ -83.8]^{\top}$ \\
-    Translation of ${}^{J}\bm{T}_{C}$ [mm] & $[-141.1,\ -15.0,\ -105.5]^{\top}$ \\
-    \bottomrule
-  \end{tabular}
-\end{table}
 
 離散角における観測値とモデル予測値を比較したところ，回転誤差は平均 $0.05^{\circ}$，並進誤差は $0.5$\,mm 以内であった．
 したがって，式(\ref{eq:system:servo_camera_model})により，任意のサーボ角におけるカメラ姿勢を十分な精度で推定できることを確認した．
@@ -171,7 +219,7 @@ DENSO VS-050 を用いた把持実験では，ロボットの可動範囲の制�
   \label{eq:system:world_camera_servo}
 \end{equation}
 
-以上のキャリブレーションにより，固定カメラ構成および1軸サーボカメラアーム構成のいずれにおいても，RGB-D カメラで取得した点群を世界座標系へ変換し，多視点点群として統合できる．
+以上のキャリブレーションにより，固定カメラ構成および1軸サーボカメラアーム構成のいずれにおいても，RGB-D カメラで取得した点群を世界座標系へ変換し，多視点点群として合成できる．
 
 
 
@@ -272,28 +320,28 @@ DENSO VS-050 を用いた把持実験では，ロボットの可動範囲の制�
 
 このように，切断する時に把持におけるエンドエフェクタ設計では，包丁側には高剛性な固定機構を，食材側には形状適応性を有する多指ハンドを使用することで，切断時の外力と把持安定性の両立を図った．
 
-\subsection{座標系定義}
-\label{sec:system:hardware:coordinate-system}
+% \subsection{座標系定義}
+% \label{sec:system:hardware:coordinate-system}
 
-各軸の向きはロボット前方を$x$軸，ロボットから見て左方向を$y$軸，鉛直上方を$z$軸とした．
+% 各軸の向きはロボット前方を$x$軸，ロボットから見て左方向を$y$軸，鉛直上方を$z$軸とした．
 
-双腕共同作業を統一的に記述するため，世界座標系を定義した．
-世界座標系の原点は左アームのベース座標系と一致させ，各軸の向きも左アームのベース座標系と同様に設定した．
-回転の表現には$x$-$y$-$z$軸周りのオイラー角を用い，各回転角度を$\alpha,\beta,\gamma$と表す．プラス回転方向は各回転軸に対して逆時計回りとした．
+% 双腕共同作業を統一的に記述するため，世界座標系を定義した．
+% 世界座標系の原点は左アームのベース座標系と一致させ，各軸の向きも左アームのベース座標系と同様に設定した．
+% 回転の表現には$x$-$y$-$z$軸周りのオイラー角を用い，各回転角度を$\alpha,\beta,\gamma$と表す．プラス回転方向は各回転軸に対して逆時計回りとした．
 
-また，各アームがお互いの動作を妨害せずに共同作業を可能とするため，両アームのベース座標系間の距離を$Y$軸方向に804\,mmとした．
-% Relative base transforms:
-% robot.denso.middle.base -> robot.denso.right.base (XYZABC, ABC in deg, Euler order XYZ):
-%   [0.433713, 0.759744, 0.064421, 1.607230, -0.778746, -92.196446]
-% robot.denso.right.base -> robot.denso.middle.base (XYZABC, ABC in deg, Euler order XYZ):
-%   [0.777336, -0.404764, -0.037188, -0.716564, -1.635894, 92.197139]
+% また，各アームがお互いの動作を妨害せずに共同作業を可能とするため，両アームのベース座標系間の距離を$Y$軸方向に804\,mmとした．
+% % Relative base transforms:
+% % robot.denso.middle.base -> robot.denso.right.base (XYZABC, ABC in deg, Euler order XYZ):
+% %   [0.433713, 0.759744, 0.064421, 1.607230, -0.778746, -92.196446]
+% % robot.denso.right.base -> robot.denso.middle.base (XYZABC, ABC in deg, Euler order XYZ):
+% %   [0.777336, -0.404764, -0.037188, -0.716564, -1.635894, 92.197139]
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.8\linewidth]{fig/chp3/chp3_old_robot_coordinate.drawio.png}
-    \caption{The coordinate system of PA10-7C.}
-    \label{fig:system:robot-env-pa10}
-\end{figure}
+% \begin{figure}[ht]
+%     \centering
+%     \includegraphics[width=0.8\linewidth]{fig/chp3/chp3_old_robot_coordinate.drawio.png}
+%     \caption{The coordinate system of PA10-7C.}
+%     \label{fig:system:robot-env-pa10}
+% \end{figure}
 % \begin{figure}[ht]
 %     \centering
 %     \includegraphics[width=.8\linewidth]{fig/chp3/ICRA_RobotEnv.png}
@@ -620,41 +668,7 @@ RealSense D435はアクティブステレオ方式により深度情報を取得
 RGB-Dカメラの単一視点からの撮影では，対象物体の自己遮蔽や環境遮蔽により不可視となる領域が生じる．
 このため，ロボットアームを動作させてカメラ姿勢を変更し，複数視点から点群を取得する必要がある．
 
-\subsection{座標系定義とカメラキャリブレーション}
-\label{sec:system:pointcloud:acquisition:calibration}
-\paragraph{座標系の定義}
 
-本システムでは，以下の座標系を定義する：
-
-\begin{enumerate}
-  \item \textbf{世界座標系} $\Sigma_W$：ロボットベース座標系を原点とし，全点群の合成先となる基準座標系．
-  \item \textbf{カメラ座標系} $\Sigma_C$：RGB-Dカメラの光学中心を原点とし，カメラの光学軸を$z$軸とする座標系．
-  \item \textbf{ロボット手先座標系} $\Sigma_H$：ロボットアームの手首先端に固定された座標系．
-\end{enumerate}
-
-
-カメラ座標系 $\Sigma_C$ で得られた点群は，以下の変換を経て世界座標系 $\Sigma_W$ へ変換される：
-
-\begin{equation}
-  {}^{W}\bm{p} = {}^{W}\bm{T}_{H} \cdot {}^{H}\bm{T}_{C} \cdot {}^{C}\bm{p}
-  \label{eq:system:transform_chain}
-\end{equation}
-
-ここで，${}^{W}\bm{T}_{H}$ はロボットの順運動学から得られる手先座標系から世界座標系への同次変換行列，${}^{H}\bm{T}_{C}$ は手先座標系に対するカメラの取り付け位置姿勢（外部パラメータ），${}^{C}\bm{p}$ はカメラ座標系における点の位置ベクトルである．
-
-\paragraph{カメラキャリブレーションと外部パラメータ}
-
-RGB-Dカメラの内部パラメータ（焦点距離 $f_x, f_y$，光学中心 $c_x, c_y$，歪み係数）は，予めチェッカーボードを用いた標準的なカメラキャリブレーションにより取得する．
-
-外部パラメータ ${}^{H}\bm{T}_{C}$ は，カメラの手先への取り付け位置姿勢を表し，以下の手順で同定する：
-
-\begin{enumerate}
-  \item ロボット手先に固定されたカメラで，既知の3次元位置にあるキャリブレーションマーカを複数姿勢から観測する．
-  \item 各観測において，カメラ座標系におけるマーカ位置と世界座標系におけるマーカ位置の対応から，Hand-Eyeキャリブレーション問題として定式化する．
-  \item 最小二乗法により ${}^{H}\bm{T}_{C}$ を推定する．
-\end{enumerate}
-
-本論文の実験環境では，事前キャリブレーションにより外部パラメータを一度だけ同定し，実験中は同一値を用いた．
 
 \subsection{座標変換と多視点点群の合成}
 \label{sec:system:pointcloud:acquisition:multi-view-fusion}
