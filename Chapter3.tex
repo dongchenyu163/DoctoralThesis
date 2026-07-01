@@ -18,14 +18,19 @@
 \section{システム構成：ハードウェア}
 \label{sec:system:hardware}
 
-本論文で扱う注ぐ動作，皮むき動作，および把持の研究では，共通の双腕ロボットシステムを用いた．
-本章で述べるロボットシステムは，筆者の修士論文で構築した料理ロボットシステムを基盤としている．
+本研究では，料理マニピュレーションの実装と評価に用いる実験プラットフォームとして，二種類の双腕ロボットシステムを構成した．
+一つは，三菱重工製PA10-7Cを二台用いた双腕ロボットシステムであり，注ぐ動作，皮むき動作，および切断時把持の検証に用いた．
+もう一つは，DENSO製VS-050を二台用いた双腕ロボットシステムであり，切断時把持の実機検証に用いた．
+いずれのシステムにおいても，RGB-Dカメラ，力覚センサ，タスク固有のエンドエフェクタを組み合わせ，対象物の3Dモデル取得とロボット動作生成を行う構成とした．
+
+本節では，まず各プラットフォームのロボットアーム構成を述べ，続いて力覚センサ，視覚センサ，座標系定義，カメラキャリブレーション，およびエンドエフェクタ設計について説明する．
+
 
 \subsection{ロボットシステム}
 \label{sec:system:hardware:robot-system}
 
+\paragraph{PA10-7Cを用いた双腕ロボットシステム}
 
-\paragraph{双腕ロボット}
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\linewidth]{fig/chp3/chp3_old_robot_coordinate.drawio.png}
@@ -33,8 +38,26 @@
     \label{fig:system:robot-env-pa10}
 \end{figure}
 
-実験には，三菱重工製の7自由度マニピュレータ PA10-7C を2台用いた（図\ref{fig:system:robot-env-pa10}）．
+PA10-7Cを用いたロボットシステムでは，三菱重工製の7自由度マニピュレータPA10-7Cを2台用いた（図\ref{fig:system:robot-env-pa10}）．
 両アームは卓上作業に適するよう床面から約700\,mmの高さに設置し，各アームのベース座標系の原点は各アームの底の中央に設定した．
+この構成では，左右のアームを独立に制御しながら，片腕で対象物または道具を保持し，他方の腕で操作を実行する双腕協調作業を行う．
+
+\paragraph{DENSO VS-050を用いた双腕ロボットシステム}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\linewidth]{fig/chp3/chp3_new_robot_coordinate.drawio.png}
+    \caption{The coordinate system of DENSO VS-050.}
+    \label{fig:system:robot-env-denso}
+\end{figure}
+
+DENSO VS-050を用いたロボットシステムでは，6軸の多関節ロボットVS-050を2台用いた（図\ref{fig:system:robot-env-denso}）．
+VS-050は可搬質量4\,kg，位置繰り返し精度$\pm 0.02$\,mmの性能を有する．
+本研究ではPA10-7Cの場合と同様に双腕構成として使用し，手先フランジ中心を基準としたツール座標系を定義した．
+また，世界座標系は左アームのベース座標系に設定し，右アームで取得・計算される点群および操作点も同一の世界座標系上で扱えるようにした．
+
+PA10-7CとDENSO VS-050では，アームの自由度や制御インタフェースが異なるため，ロボット固有の制御命令はそれぞれのロボットシステムに合わせて実装した．
+一方，RGB-Dカメラから得られた点群を世界座標系へ変換し，3Dモデルとして後段の分析処理に渡すという処理の流れは共通である．
 
 \subsection{力覚センサ}
 \label{sec:system:hardware:force-sensor}
@@ -182,7 +205,14 @@ RGB-D カメラから取得した点群を多視点で合成するためには�
 \paragraph{1軸サーボカメラアームのキャリブレーション}
 \label{sec:system:servo_cam_calib}
 
-DENSO VS-050 （詳細は構成変更の\ref{sec:system:configuration-changes:hardware}節）では，ロボットの可動範囲の制約を補うため，RGB-D カメラを1軸サーボアームに取り付けた（図\ref{fig:system:robot_camera_arm}）．
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=.7\linewidth]{fig/chp3/chp3_new_robot_camera_arm.png}
+  \caption{The camera arm for DENSO VS-050.}
+  \label{fig:system:robot-camera-arm-denso}
+\end{figure}
+
+DENSO VS-050を用いたロボットシステムでは，ロボットの可動範囲の制約を補うため，RGB-Dカメラを1軸サーボアームに取り付けた（図\ref{fig:system:robot-camera-arm-denso}）．
 この構成では，サーボ角 $\theta$ に応じてカメラ姿勢が変化するため，固定値としての ${}^{H}\bm{T}_{C}$ ではなく，角度依存の外部パラメータを計算する必要がある．
 
 本研究では，サーボカメラアームを1自由度の回転関節としてモデル化した．
@@ -488,111 +518,6 @@ RTC\_PointCloudProcessのポート構成を図\ref{fig:system:rtc-pointcloud-pro
     \label{fig:system:rtc-overall-connections}
 \end{figure}
 
-\section{研究間の構成変更}
-\label{sec:system:configuration-changes}
-
-\subsection{構成差分}
-\label{sec:system:configuration-changes:differences}
-三つの研究，および第三研究の前後半におけるシステム構成の差分を表\ref{tab:system:configuration-diff}に整理する．
-最下行に示す通り，点群処理パイプラインの本質は全構成で同一である．
-
-
-\begin{table}[ht]
-  \centering
-  \caption{Differences in system configurations.}
-  \label{tab:system:configuration-diff}
-  \small
-  \setlength{\tabcolsep}{3pt}
-  \renewcommand{\arraystretch}{1.15}
-  \begin{tabularx}{\textwidth}{@{}
-    >{\raggedright\arraybackslash}p{0.18\textwidth}
-    *{4}{>{\centering\arraybackslash}X}
-    @{}}
-    \toprule
-    \textbf{Component}
-    & \makecell{\textbf{Pouring}}
-    & \makecell{\textbf{Peeling}}
-    & \makecell{\textbf{Holding}\\\textbf{(first half)}}
-    & \makecell{\textbf{Holding}\\\textbf{(second half)}} \\
-    \midrule
-
-    Robot arm
-    & PA10-7C
-    & Same as left
-    & Same as left
-    & DENSO VS-050 \\
-
-    \cmidrule{2-5}
-    Robot control
-    & \makecell{RTC\_PA10\\(OpenRTM)}
-    & Same as left
-    & Same as left
-    & Direct Python control \\
-
-    \cmidrule{2-5}
-    Force sensor
-    & \makecell{PFS080YA501U6S\\(via RTC\_PA10)}
-    & Same as left
-    & Same as left
-    & \makecell{PFS080YA501U6S\\(Python serial communication)} \\
-
-    \cmidrule{2-5}
-    Image and point cloud acquisition
-    & \makecell{RTC\_Realsense\\(OpenRTM)}
-    & Same as left
-    & \makecell{Python\\librealsense}
-    & Same as left \\
-
-    \cmidrule{2-5}
-    Point cloud processing
-    & \makecell{RTC\_PointCloudProcess\\(PCL)}
-    & Same as left
-    & \makecell{Python\\(Open3D + PCL wrapper)}
-    & Same as left \\
-
-    \cmidrule{2-5}
-    Point cloud processing pipeline
-    & \multicolumn{4}{c@{}}{\textbf{Same} (see Sec.~\ref{sec:system:pointcloud:processing:pipeline})} \\
-
-    \bottomrule
-  \end{tabularx}
-\end{table}
-
-
-
-
-
-
-
-% ============================================================
-
-\subsection{ハードウェア構成の変更}
-\label{sec:system:configuration-changes:hardware}
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.8\linewidth]{fig/chp3/chp3_new_robot_coordinate.drawio.png}
-    \caption{The coordinate system of DENSO VS-050.}
-    \label{fig:system:robot-env-denso}
-\end{figure}
-
-なお，第三研究（\ref{ch:holding}章の把持）の後半では，PA10-7C二台の故障に伴い，DENSO製VS-050へ変更した．
-VS-050は6軸の多関節ロボットであり，可搬質量4\,kg，位置繰り返し精度$\pm 0.02$\,mmの性能を有する．PA10-7Cと同様に双腕構成で使用し，双腕のベース座標系間の距離（図\ref{fig:system:robot-env-denso}の右側のロボットを参照する）は$XY$軸方向にそれぞれ777\,mm -405\,mmとした．DENSO VS-050においても同様に，手先フランジ中心を基準としたツール座標系を定義し，ツール先端の位置姿勢を制御の基準とした．また，世界座標系はPA10-7Cの場合と同様に左アームのベース座標系に設定した．
-
-ただし，第三（把持）研究後半のロボット交換の可動範囲の減少の影響で，カメラの固定は1軸のサーボアーム（図\ref{fig:system:robot-camera-arm-denso}）を利用し，動けるようになった．
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=.7\linewidth]{fig/chp3/chp3_new_robot_camera_arm.png}
-    \caption{The camera arm for DENSO VS-050.}
-    \label{fig:system:robot-camera-arm-denso}
-\end{figure}
-
-\subsection{ソフトウェア構成の変更}
-\label{sec:system:configuration-changes:software}
-第三研究（把持）では，ソフトウェア構成を段階的に変更した．
-前半では，ロボット制御は第一・第二研究と同様にRTC\_PA10（OpenRTM）を用いたが，画像・点群の取得および処理は開発の柔軟性向上のためPython（librealsense SDK, Open3D, 自作PCL Wrapper）へ移行した．
-後半では，PA10-7Cの故障に伴いDENSO VS-050へ変更したことを契機として，ロボット制御についてもOpenRTMからPython直接制御へ移行するとともに，
-力覚センサのデータ取得もRTC\_PA10経由からPythonシリアル通信へ変更した．
-ただし，点群処理パイプライン自体は全研究で同一である（\ref{sec:system:pointcloud:processing:pipeline}節参照）．
 
 \section{3D点群モデルの位置づけと全体パイプライン}
 \label{sec:system:pointcloud:overview}
