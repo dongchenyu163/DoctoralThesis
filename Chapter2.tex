@@ -32,7 +32,7 @@ Zengら\cite{Zeng2024ShapeFollowingLaserCleaning}も3D点群表面に基づく�
 外力が加わる状況下の安定性解析と外乱耐性に関して，切断や保持において外力が加わる場合，把持の安定性評価が必要不可欠である．
 Bicchi\cite{Bicchi1995Closure}は力学的なClosure特性を統一的に論じ，FerrariとCanny\cite{FerrariCanny1992OptimalGrasps}はWrench空間に基づく把持の品質指標（Grasp quality measures）を提案した．
 RoaとSuárez\cite{RoaSuarez2014GraspQualityReview}はこれらの指標を総括し，外乱に対する抵抗力がタスクの成否を分けることを示している．
-本論文の「押さえる」タスクは，まさに切断反力を抵抗する適切な把持点の探索問題である．
+本論文の「安定把持」タスクは，まさに切断反力を抵抗する適切な把持点の探索問題である．
 
 食品の切断モデルと把持の近年方向について，食品切断の力学は非常に複雑である．
 Mitsioniら\cite{Mitsioni2021FoodCuttingDynamics}は切断ダイナミクスをRNNで学習し制御に組み込んだ．
@@ -51,7 +51,7 @@ Ard{\'o}nら\cite{Ardon2021AffordanceReview}も環境と対象の相互作用可
 本論文におけるモデルの計測方針は，対象周囲の複数視点からの点群取得に加え，必要に応じて対象を把持して底面側を観測し，取得した点群を統合することで不完全観測を低減するという実践的なアプローチとして位置づけられる．
 
 \section{タスク別研究の整理}
-本節では，本論文で検証タスクとして取り上げる「注ぐ」「剥く」「押さえる（把持）」の各操作に関する個別研究を整理し，提案手法の有効性を明らかにする．
+本節では，本論文で検証タスクとして取り上げる「注ぐ」「剥く」「安定把持（把持）」の各操作に関する個別研究を整理し，提案手法の有効性を明らかにする．
 
 \subsection{注ぐ（流体操作）に関する研究}
 ロボットによる注ぎ操作は，液体モデルの複雑さと容器の多様性から多くの研究がなされてきた．
@@ -74,7 +74,7 @@ Houら\cite{Hou2022PeelingPlanning}は自動皮むきのための幾何的な経
 微小力センシングの観点では，網膜手術などの医療分野における微小力フィードバック研究\cite{Balicki2010MicroForcePeeling}が，接触力管理の設計思想として参考になる．
 本論文の「剥く」タスクは，幾何分析による軌道生成と力覚フィードバックを明示的に分離・統合し，個体差への高い適応力を実現する．
 
-\subsection{切断中把持・押さえる操作に関する研究}
+\subsection{切断時の安定把持に関する研究}
 切断における把持安定化の研究は，切断自体の制御と把持計画の融合領域に位置する．
 切断制御の古典としてZengとHemami\cite{ZengHemami1997Cutting}やJungとHsia\cite{JungHsia1999Cutting}による適応制御があり，近年では視覚ベース切断の課題整理\cite{Singh2025VisionBasedCuttingSurvey}や，前述の学習動力学\cite{Mitsioni2021FoodCuttingDynamics}が提案されている．
 切断力学に基づく刃物の運動最適化については，MuとJia\cite{MuJia2022PropertyKnifeOpt}の物性推定や，Zhouらの詳細な応力分布・力学モデル\cite{Zhou2006PressSliceI, Zhou2006PressSliceII}，Atkinsら\cite{Atkins2004CheddarSalami}の柔軟材料における押し引き切断の分析が重要である．
@@ -83,7 +83,7 @@ Houら\cite{Hou2022PeelingPlanning}は自動皮むきのための幾何的な経
 外力に対する安定把持計画の基礎としては，Millerら\cite{Miller2003ShapePrimitives}の形状プリミティブ近似，MirtichとCanny\cite{MirtichCanny1994OptGrasps}の実用的最適把持計算，Pelossofら\cite{Pelossof2004SVMGrasping}のSVMを用いた学習把持，Nguyen\cite{Nguyen1988ForceClosure}のForce-Closureの幾何的構成法が挙げられる．
 多指ハンドにおける力の分離については，YoshikawaとNagai\cite{YoshikawaNagai1987Forces}の操作力と把持力の概念や，Donnerら\cite{Donner2018WrenchDecomposition}の物理的に妥当なWrench分解手法が強力な理論的背景となる．
 さらに，拘束環境下での衝突を考慮した把持\cite{Lou2021CollisionAwareGrasping}や，重心と力覚に基づく姿勢適応\cite{Kanoulas2018CoMGraspAdapt}など，環境制約と外乱を同時に扱う技術が進展している．
-本論文では，切断によって生じるWrenchを解析的に推定し，これを外乱として把持の安定性評価に組み込むことで，探索に基づく最適な「押さえる」操作を実現する．
+本論文では，切断によって生じるWrenchを解析的に推定し，これを外乱として把持の安定性評価に組み込むことで，探索に基づく最適な「安定把持」操作を実現する．
 
 \section{まとめ}
 以上の関連研究は，大きく次の三つのアプローチとして整理できる．
