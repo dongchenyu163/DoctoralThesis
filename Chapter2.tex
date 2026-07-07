@@ -1,5 +1,5 @@
 \chapter{関連研究}
-本章では，3Dモデルを基盤として料理操作の動作と制御を設計する本研究の位置づけを明確にするため，先行研究を三つの分析観点と三つの検証タスクから整理する．まず，料理ロボット全体の研究動向を概観し，タスクレベルの計画と実行層の物理操作との関係を確認する．次に，幾何学的分析，力学的分析，および環境・道具の分析に関する研究を整理する．最後に，皮むき，定量注ぎ，および切断中の安定把持に関連する研究を比較し，本論文の位置づけを明らかにする．
+本章では，3Dモデルを基盤として料理操作の動作と制御を設計する本研究の位置づけを明確にするため，先行研究を三つの分析観点と三つの検証タスクから整理する．まず，料理ロボット全体の研究動向を概観し，タスクレベルの計画と実行層の物理操作との関係を確認する．次に，幾何学的な分析，力学的な分析，および環境・道具の分析に関する研究を整理する．最後に，皮むき，定量注ぎ，および切断中の安定把持に関連する研究を比較し，本論文の位置づけを明らかにする．
 
 \section{料理ロボットの研究}
 料理ロボットに求められる汎化能力と物理的相互作用の観点について，Sochackiら\cite{Sochacki2024PracticalChefReview}は料理ロボットに関する包括的なレビューを行い，家庭環境での調理では対象物の状態変動と複雑な接触相互作用が支配的であり，単純なピックアンドプレースだけではタスクが成立しないことを指摘している．
@@ -12,7 +12,7 @@
 しかし，料理における道具を介した操作には厳密な物理制約が存在する．
 本論文は，計画層が決定した後の「動作と制御パラメータの導出」に焦点を当て，3Dモデルを計算代理として用いることで，これらの物理的拘束を解析的に解決するアプローチをとる．
 
-\section{幾何学的分析に基づく操作設計（形状）}
+\section{幾何学的な分析に基づく操作設計（形状）}
 家庭環境の多様な形状に適応するための3Dモデル化と環境認識について，ロボットビジョンにおける3D再構成技術は，RGB-Dセンサの発展とともに成熟してきた．
 Newcombeら\cite{Newcombe2011KinectFusion}が提案したKinectFusionは，TSDF（Truncated Signed Distance Function）を用いてリアルタイムな密3D再構成を実現した古典的かつ強力な手法である．
 その後，Whelanら\cite{Whelan2015ElasticFusion}によるElasticFusionやDaiら\cite{Dai2017BundleFusion}によるBundleFusionにより，非剛体整合やグローバル整合の最適化が進展した．
@@ -22,10 +22,10 @@ Newcombeら\cite{Newcombe2011KinectFusion}が提案したKinectFusionは，TSDF�
 幾何特徴抽出と軌道生成に関して，取得した点群から，法線や曲率などの幾何特徴を抽出することは，操作設計の第一歩である．
 NguyenとLe\cite{Nguyen2013PointCloudSegSurvey}は点群セグメンテーションの包括的なサーベイを提供し，Martínez-Otzetaら\cite{MartinezOtzeta2022RANSACSurvey}はRANSACを用いた平面やモデルの推定の有用性を整理した．
 さらに，これらの幾何情報を直接利用した軌道生成として，Yuら\cite{Yu2021PointCloudSlicingRobotica}やZhangら\cite{Zhang2025ContourParallelToolpathPointCloud}は，点群をスライスして断面輪郭を抽出し，ツールパスを生成するアルゴリズムを提案している．
-Zengら\cite{Zeng2024ShapeFollowingLaserCleaning}も3D点群表面に基づく形状追従軌道の計画を行っている．
-本論文における「剥く」タスクの軌道設計は，これらの断面抽出アプローチと軌を一つにするが，さらに力学的接触の維持を統合する点に特徴がある．
+Zengら\cite{Zeng2024ShapeFollowingLaserCleaning}も3D点群表面に基づく形状追跡軌道の計画を行っている．
+本論文における「皮むき」タスクの軌道設計は，これらの断面抽出アプローチと軌を一つにするが，さらに力学的接触の維持を統合する点に特徴がある．
 
-\section{力学的分析に基づく操作設計（力）}
+\section{力学的な分析に基づく操作設計（力）}
 調理操作における対象物の変形や破壊を伴う接触タスクと基本制御について，ロボットが環境と接触する際の制御理論として，Hogan\cite{Hogan1985ImpedanceControl}のインピーダンス制御や，RaibertとCraig\cite{RaibertCraig1981Hybrid}のハイブリッド位置/力制御が広く知られている．
 これらの古典的枠組みは，拘束方向と自由方向を分離・管理する上で現在も極めて有効である．
 
@@ -51,7 +51,17 @@ Ard{\'o}nら\cite{Ardon2021AffordanceReview}も環境と対象の相互作用可
 本論文におけるモデルの計測方針は，対象周囲の複数視点からの点群取得に加え，必要に応じて対象を把持して底面側を観測し，取得した点群を統合することで不完全観測を低減するという実践的なアプローチとして位置づけられる．
 
 \section{タスク別研究の整理}
-本節では，本論文で検証タスクとして取り上げる「注ぐ」「剥く」「安定把持（把持）」の各操作に関する個別研究を整理し，提案手法の有効性を明らかにする．
+本節では，本論文で検証タスクとして取り上げる「注ぐ」「皮むき」「安定把持」の各操作に関する個別研究を整理し，提案手法の有効性を明らかにする．
+
+\subsection{皮むき（表面追跡）に関する研究}
+皮むき動作は，不規則な曲面に対する幾何学的な軌道追跡と，接触力を維持する力制御の統合が必要なタスクである．
+Houら\cite{Hou2022PeelingPlanning}は自動皮むきのための幾何的な経路設計問題を整理した．
+また，マルチモダルな情報とインピーダンス制御を用いた単腕皮むきシステム\cite{Arxiv2024MultimodalPeeling}や，対象物の再配向を伴う拘束付き巧緻操作としての皮むき\cite{Arxiv2024ConstrainedDexterousPeeling}も実機実装として報告されている．
+
+剥皮を成立させる前提となる手内操作（In-hand manipulation）能力については，Rojasら\cite{Rojas2016GR2}の劣駆動機構による手内平面操作，Maら\cite{Ma2017WholeHandCaging}のCagingによるロバスト把持，McCannとDollar\cite{McCann2017StewartHand}のパラレルメカニズム型ハンド，Mnyusiwallaら\cite{Mnyusiwalla2016BioInspiredInsideHand}の生体模倣指などが提案されている．
+さらにLiarokapisとDollarは，手内操作のプリミティブ抽出\cite{Liarokapis2017Primitives}やタスク特化モデルの学習\cite{Liarokapis2016TaskSpecificModels}を論じている．
+微小力センシングの観点では，網膜手術などの医療分野における微小力フィードバック研究\cite{Balicki2010MicroForcePeeling}が，接触力管理の設計思想として参考になる．
+本論文の「皮むき」タスクは，幾何分析による軌道生成と力覚フィードバックを明示的に分離・統合し，個体差への高い適応力を実現する．
 
 \subsection{注ぐ（流体操作）に関する研究}
 ロボットによる注ぎ操作は，液体モデルの複雑さと容器の多様性から多くの研究がなされてきた．
@@ -63,16 +73,6 @@ Reyes-Montiel\cite{ReyesMontiel2026PouringReview}の最新のレビューやHuan
 容器の幾何形状に着目した研究としては，Brandlら\cite{Brandl2014WarpedPouring}のワーピングによる一般化や，Mottaghiら\cite{Mottaghi2017GlassHalfFull}の画像からの容積推定がある．
 液面知覚に関しては，ステレオ視による流動観測\cite{YamaguchiAtkeson2016StereoFlow}，深層学習による液体知覚\cite{SchenckFox2016LiquidsISER}，RGB-Dを用いた確率的液面推定\cite{Do2016ProbLiquidLevel}などが提案されており，失敗からの回復を学習に組み込む試み\cite{Langsfeld2014FailureToSuccessPouring}も存在する．
 本論文の注ぎ操作は，事前の流体学習に依存せず，未知の容器の3D点群モデルから直接容積と幾何制約を推論することで，解析的に注ぎパラメータを導出する点に新規性がある．
-
-\subsection{剥く（表面追従）に関する研究}
-皮むき動作は，不規則な曲面に対する幾何学的な軌道追従と，接触力を維持する力制御の統合が必要なタスクである．
-Houら\cite{Hou2022PeelingPlanning}は自動皮むきのための幾何的な経路設計問題を整理した．
-また，マルチモダルな情報とインピーダンス制御を用いた単腕皮むきシステム\cite{Arxiv2024MultimodalPeeling}や，対象物の再配向を伴う拘束付き巧緻操作としての皮むき\cite{Arxiv2024ConstrainedDexterousPeeling}も実機実装として報告されている．
-
-剥皮を成立させる前提となる手内操作（In-hand manipulation）能力については，Rojasら\cite{Rojas2016GR2}の劣駆動機構による手内平面操作，Maら\cite{Ma2017WholeHandCaging}のCagingによるロバスト把持，McCannとDollar\cite{McCann2017StewartHand}のパラレルメカニズム型ハンド，Mnyusiwallaら\cite{Mnyusiwalla2016BioInspiredInsideHand}の生体模倣指などが提案されている．
-さらにLiarokapisとDollarは，手内操作のプリミティブ抽出\cite{Liarokapis2017Primitives}やタスク特化モデルの学習\cite{Liarokapis2016TaskSpecificModels}を論じている．
-微小力センシングの観点では，網膜手術などの医療分野における微小力フィードバック研究\cite{Balicki2010MicroForcePeeling}が，接触力管理の設計思想として参考になる．
-本論文の「剥く」タスクは，幾何分析による軌道生成と力覚フィードバックを明示的に分離・統合し，個体差への高い適応力を実現する．
 
 \subsection{切断時の安定把持に関する研究}
 切断における把持安定化の研究は，切断自体の制御と把持計画の融合領域に位置する．
