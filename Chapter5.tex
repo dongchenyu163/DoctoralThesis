@@ -854,11 +854,15 @@ $-5\,\mathrm{ml}$ の範囲に誤差が集中し，注ぎの進行とともに
 %     \bottomrule
 %   \end{tabular}
 % \end{table}
-\begin{table}[H]
+\begin{table}[!t]
   \centering
   \caption{Comparison of Method 1 and Method 2}
   \label{tab:pour_method_comparison}
-  \begin{tabular}{@{}p{0.28\textwidth}p{0.31\textwidth}p{0.31\textwidth}@{}}
+    \begingroup
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \renewcommand{\arraystretch}{0.95}
+  \begin{tabularx}{.75\textwidth}{@{}p{0.28\textwidth}p{0.31\textwidth}p{0.31\textwidth}@{}}
     \toprule
     Item & Method 1 (target container based) & Method 2 (pouring container based) \\
     \midrule
@@ -876,9 +880,9 @@ $-5\,\mathrm{ml}$ の範囲に誤差が集中し，注ぎの進行とともに
     Disadvantages & Requires liquid level observation during pouring &
     Largely affected by surface tension; sensitive to container individual differences (wall thickness, deformation) \\
     \bottomrule
-  \end{tabular}
+  \end{tabularx}
+  \endgroup
 \end{table}
-
 
 \begin{enumerate}
   \item \textbf{精度：}  
