@@ -72,7 +72,7 @@ PA10-7CとDENSO VS-050では，アームの自由度や制御インタフェー�
     \label{fig:system:force-sensor-install}
 \end{figure}
 
-本センサの性能パラメータを図\ref{fig:system:force-sensor-spec}に示す．
+本センサの性能パラメータを表\ref{tab:system:force-sensor-spec}に示す．
 データシートに基づき，本センサの力の分解能は以下の通り計算される：
 
 \begin{equation}
@@ -83,12 +83,35 @@ PA10-7CとDENSO VS-050では，アームの自由度や制御インタフェー�
 \end{split}
 \end{equation}
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=1\linewidth]{fig/chp3/ForceSensor-performence.png}
-    \caption{Specification sheet of the PFS080YA501U6S.}
-    \label{fig:system:force-sensor-spec}
-\end{figure}
+% \begin{figure}[ht]
+%     \centering
+%     \includegraphics[width=1\linewidth]{fig/chp3/ForceSensor-performence.png}
+%     \caption{Specification sheet of the PFS080YA501U6S.}
+%     \label{fig:system:force-sensor-spec}
+% \end{figure}
+\begin{table}[ht]
+  \centering
+  \caption{Main specifications of the PFS080YA501U6S \cite{leptrino_6axis_force_sensor}.}
+  \label{tab:system:force-sensor-spec}
+  \begingroup
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \renewcommand{\arraystretch}{0.8}
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Item & Specification \\
+    \midrule
+    % Model & PFS080YA501U6 \\
+    Rated force capacity ($F_x$, $F_y$, $F_z$) & $\pm 500$ N \\
+    Rated moment capacity ($M_x$, $M_y$, $M_z$) & $\pm 20$ N$\cdot$m \\
+    % Allowable overload & $\pm 200\%$ R.C. \\
+    % Nonlinearity & $\pm 1.0\%$ R.O. \\
+    % Inter-axis interference & $\pm 2.0\%$ R.O. \\
+    Resolution & $1/4000$ \\
+    \bottomrule
+  \end{tabular}
+  \endgroup
+\end{table}
 
 % 力覚情報は，特にツールと対象表面との接触が重要となる皮むき動作において有効であり，接触状態の確認および制御入力の設計に用いた．
 % また，本論文では，3Dモデルに基づく幾何学的解析に加えて，接触に伴う力学的な情報も操作設計の一部として扱うため，力覚センサはそのための共通計測基盤として位置づけられる．
@@ -1425,8 +1448,15 @@ $z$方向では190\,mmおよび170\,mm条件で1--2\,mm程度の正の誤差が�
 
 \paragraph{実験目的と対象物}
 
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.7\linewidth]{fig/chp3/chp3_cups.drawio.png}
+    \caption{The 3D-Printed cups used in experiment section \ref{sec:system:pointcloud:evaluation:3d-printed-object}.}
+    \label{fig:system:pointcloud:evaluation:3d-printed-object}
+\end{figure}
+
 次に，標準物体よりも複雑な形状をもつ対象に対して，提案パイプラインがタスクに必要な幾何情報を抽出できるかを評価した．
-対象物は，図3Dプリンタで作製した5種類の容器であり，それぞれCup 1\~5と呼ぶ．
+対象物は，3Dプリンタで作製した5種類の容器であり，それぞれCup 1-5と呼ぶ．
 これらは開口部形状，側面曲率，底面形状，および傾斜部の有無が異なるため，容器モデル取得における典型的な形状差を含んでいる．
 評価は，容積計算精度と表面形状誤差の二つの観点から行った．
 
@@ -1518,7 +1548,13 @@ Cup 1の誤差が大きくなった原因としては，容器サイズが大き
 さらに，手指によって遮蔽される領域を減らすため，対象物を一度置き直し，ハンドを$z$軸周りに90$^{\circ}$回転させた状態で同じ手順を繰り返した．
 得られた点群からハンドのみの点群を差し引き，式(\ref{eq:system:bottom_restore_point})に基づいてテーブル上の基準姿勢へ復元した後，上面・側面点群と統合した．
 
-評価対象は，3Dプリンタで作製した5種類の物体である．
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{fig/chp3/chp3_random_potato.drawio.pdf}
+    \caption{The 3D-Printed objects used in experiment section \ref{sec:system:pointcloud:evaluation:bottom-surface}.}
+    \label{fig:system:pointcloud:evaluation:bottom-surface}
+\end{figure}
+評価対象は，図\label{fig:system:pointcloud:evaluation:bottom-surface}に示した，3Dプリンタで作製した5種類の物体である．
 真値形状には各物体のCADモデルを用い，ICP位置合わせ後に各点からCADモデルまでの最短距離を計算した．
 評価指標は，距離誤差の平均値，標準偏差，およびRMSEである．
 
@@ -1556,7 +1592,7 @@ Cup 1の誤差が大きくなった原因としては，容器サイズが大き
 この情報は，物体の幾何学的重心の近似，把持候補点の生成，および安定把持における接触可能領域の評価に有効である．
 したがって，底面取得では局所的な誤差は増加するものの，対象物全体の幾何情報を補完するという目的に対しては有効であると考えられる．
 
-\paragraph{本節のまとめ}
+\subsection{本セクションのまとめ}
 
 以上の三種類の評価実験から，提案した3D点群モデル取得パイプラインは，標準物体に対しては半径1\,mm未満，位置1--2\,mm程度の誤差で幾何プリミティブを推定できることが確認された．
 また，3Dプリンタ製容器に対しては，平均相対誤差2.31\%で容積を推定でき，CADモデルに対する表面RMSEは1.424--3.522\,mmであった．
@@ -1570,7 +1606,7 @@ Cup 1の誤差が大きくなった原因としては，容器サイズが大き
 本章の主要な内容を以下に要約する：
 
 \begin{enumerate}
-  \item \textbf{ロボットシステムの構成}：双腕ロボット（PA10-7C / DENSO VS-050），力覚センサ，平行グリッパ，RGB-Dカメラからなるハードウェア基盤を構築した．ソフトウェアはOpenRTMベースのRTC統合アーキテクチャを基本とする．また，三つのタスクそれぞれに最適化されたエンドエフェクタを設計・実装した．
+  \item \textbf{ロボットシステムの構成}：双腕ロボット（PA10-7C / DENSO VS-050），力覚センサ，平行グリッパ，RGB-Dカメラからなるハードウェア基盤を構築した．また，三つのタスクそれぞれに適切なエンドエフェクタを設計・実装した．
 
   \item \textbf{点群取得}：RGB-Dカメラを用いた多視点点群撮影，座標系定義（世界・カメラ・手先の3階層），Hand-Eyeキャリブレーションによる外部パラメータ同定，座標変換による多視点点群合成の手順を確立した．これにより，単一視点では不可視となる領域を含む全周的な物体形状の取得が可能となった．
 
