@@ -1456,7 +1456,7 @@ $z$方向では190\,mmおよび170\,mm条件で1--2\,mm程度の正の誤差が�
 \end{figure}
 
 次に，標準物体よりも複雑な形状をもつ対象に対して，提案パイプラインがタスクに必要な幾何情報を抽出できるかを評価した．
-対象物は，3Dプリンタで作製した5種類の容器であり，それぞれCup 1-5と呼ぶ．
+対象物は，図\ref{fig:system:pointcloud:evaluation:3d-printed-object}で示した，3Dプリンタで作製した5種類の容器であり，それぞれCup 1-5と呼ぶ．
 これらは開口部形状，側面曲率，底面形状，および傾斜部の有無が異なるため，容器モデル取得における典型的な形状差を含んでいる．
 評価は，容積計算精度と表面形状誤差の二つの観点から行った．
 
@@ -1554,7 +1554,7 @@ No.1の誤差が大きくなった原因としては，容器サイズが大き�
     \caption{The 3D-Printed objects used in experiment section \ref{sec:system:pointcloud:evaluation:bottom-surface}.}
     \label{fig:system:pointcloud:evaluation:bottom-surface}
 \end{figure}
-評価対象は，図\label{fig:system:pointcloud:evaluation:bottom-surface}に示した，3Dプリンタで作製した5種類の物体である．
+評価対象は，図\ref{fig:system:pointcloud:evaluation:bottom-surface}に示した，3Dプリンタで作製した5種類の物体である．
 真値形状には各物体のCADモデルを用い，ICP位置合わせ後に各点からCADモデルまでの最短距離を計算した．
 評価指標は，距離誤差の平均値，標準偏差，およびRMSEである．
 
@@ -1564,7 +1564,7 @@ No.1の誤差が大きくなった原因としては，容器サイズが大き�
 
 \begin{table}[t]
   \centering
-  \caption{Distance errors of point clouds including bottom-surface acquisition.}
+  \caption{Distance errors of point clouds including bottom-surface acquisition for each object in figure.\ref{fig:system:pointcloud:evaluation:bottom-surface}.}
   \label{tab:system:bottom-pointcloud}
   \small
   \begin{tabular}{lrrr}
