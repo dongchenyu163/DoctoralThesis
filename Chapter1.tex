@@ -11,8 +11,8 @@
 経済協力開発機構（OECD）の統計によると，日本の生産年齢人口は1995年のピーク時から2024年までに約16\%減少し，現役世代に対する高齢者の比率を示す老年従属人口指数は同期間に21\%から49\%へと急増した\cite{oecd_japan_2024}．
 \begin{figure}
     \centering
-    \includegraphics[width=0.75\linewidth]{fig//chp1/population_changing.png}
-    \caption{高齢化の推移と将来の推計\cite{cabinet_office_2025}}
+    \includegraphics[width=0.75\linewidth]{fig/chp1/chp1_no_people.png}
+    \caption{Trends in population ageing and future projections in japan\cite{cabinet_office_2025}}
     \label{fig:placeholder}
 \end{figure}
 
@@ -38,25 +38,60 @@
 
 一方，一般家庭のキッチンで稼働するサービスロボットには，産業用とは対照的な「非構造化環境」への適応が求められる（表\ref{tab:robot_comparison}参照）．
 
+% \begin{table}[ht]
+%   \centering
+%   \caption{産業用ロボットと家庭用ロボットの特徴と比較}
+%   \label{tab:robot_comparison}
+%   \begin{tabularx}{\textwidth}{@{}lXX@{}}
+%     \toprule
+%     比較項目 & 産業用ロボット（工場） & 家庭用ロボット（キッチン） \\
+%     \midrule
+%     \textbf{環境} & \textbf{構造化環境} \newline 照明・配置が厳密に管理・固定 & \textbf{非構造化環境} \newline 未知で動的に変化する実世界 \\
+%     \midrule
+%     \textbf{アプローチ} & \textbf{タスク特化} \newline 液体・粉末等は専用機械で処理 & \textbf{タスク汎用性} \newline 1台のロボットで全工程を処理 \\
+%     \midrule
+%     \textbf{対象物} & \textbf{性状を問わず，対象ごとに専用機構で取り扱う}  & \textbf{形状不定・柔軟物} \newline 個体差が大きく未知のものが多い \\
+%     \midrule
+%     \textbf{制約条件} & \textbf{大規模な専用スペース・設備が可能} & \textbf{人間と共存する限られた空間} \newline 省スペース性が必須 \\
+%     \midrule
+%     \textbf{優先指標} & \textbf{生産効率・速度} \newline 1秒間に何個処理できるか & \textbf{適応力・汎用性} \newline 未知の状況に対応できるか \\
+%     \bottomrule
+%   \end{tabularx}
+% \end{table}
 \begin{table}[ht]
   \centering
-  \caption{産業用ロボットと家庭用ロボットの特徴と比較}
+  \caption{Comparison between Industrial and Domestic Robots}
   \label{tab:robot_comparison}
-  \begin{tabularx}{\textwidth}{@{}lXX@{}}
+  \begingroup
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \renewcommand{\arraystretch}{0.95}
+  \begin{tabularx}{.95\textwidth}{@{}lXX@{}}
     \toprule
-    比較項目 & 産業用ロボット（工場） & 家庭用ロボット（キッチン） \\
+    Item & Industrial Robots & Domestic Robots \\
     \midrule
-    \textbf{環境} & \textbf{構造化環境} \newline 照明・配置が厳密に管理・固定 & \textbf{非構造化環境} \newline 未知で動的に変化する実世界 \\
+    \textbf{Environment}
+    & \textbf{Structured} \newline Lighting and object placement are controlled
+    & \textbf{Unstructured} \newline Conditions are unknown and dynamically changing \\
     \midrule
-    \textbf{アプローチ} & \textbf{タスク特化} \newline 液体・粉末等は専用機械で処理 & \textbf{タスク汎用性} \newline 1台のロボットで全工程を処理 \\
+    \textbf{Approach}
+    & \textbf{Task-specific} \newline Dedicated machines are used for each process
+    & \textbf{Versatile} \newline A single robot handles multiple processes \\
     \midrule
-    \textbf{対象物} & \textbf{性状を問わず，対象ごとに専用機構で取り扱う}  & \textbf{形状不定・柔軟物} \newline 個体差が大きく未知のものが多い \\
+    \textbf{Objects}
+    & \textbf{Dedicated handling} \newline Objects are handled according to their properties
+    & \textbf{Irregular and deformable} \newline Objects vary widely and are often unknown \\
     \midrule
-    \textbf{制約条件} & \textbf{大規模な専用スペース・設備が可能} & \textbf{人間と共存する限られた空間} \newline 省スペース性が必須 \\
+    \textbf{Constraints}
+    & \textbf{Dedicated space} \newline Large-scale equipment can be used
+    & \textbf{Shared limited space} \newline Space-saving design is required \\
     \midrule
-    \textbf{優先指標} & \textbf{生産効率・速度} \newline 1秒間に何個処理できるか & \textbf{適応力・汎用性} \newline 未知の状況に対応できるか \\
+    \textbf{Priority}
+    & \textbf{Efficiency and speed} \newline Processing quantity per unit time
+    & \textbf{Adaptability} \newline Response to unknown situations \\
     \bottomrule
   \end{tabularx}
+  \endgroup
 \end{table}
 
 \begin{enumerate}
@@ -78,9 +113,9 @@
 これらの家庭環境特有の課題は，ロボットによる物理的なマニピュレーションの観点から抽象化すると，本質的に（i）形状の多様性，（ii）力学的相互作用の複雑さ，（iii）環境・道具による拘束，という3つの「物理的制約」として整理できる．
 
 
-\section{技術的課題と解決へのアプローチ}
+\section{課題と提案手法}
 
-\subsection{家庭用調理における物理インタラクションの困難性}
+\subsection{家庭環境での困難性}
 
 前述の通り，家庭環境での適応性を実現するためには，調理作業に内在する以下の3つの物理的制約を克服する必要がある．
 
@@ -102,7 +137,7 @@
 \begin{figure}[t]
     \centering
     \includegraphics[width=.95\linewidth]{fig//chp1/DoctoralThesis_TopFlow.drawio.pdf}
-    \caption{提案したアプローチの流れ}
+    \caption{The flow of proposed approach}
     \label{fig:topflow}
 \end{figure}
 
@@ -123,7 +158,7 @@
 本論文が提案するのは，あくまで「3Dモデル上の分析から動作パラメータを導出する」という設計アプローチであり，あらゆる料理タスクを全自動化する単一のシステムではない．
 しかし，このアプローチは多様な物理的制約を持つタスクに対して汎用的に適用可能である．
 
-\section{本論文の目的とアプローチの検証}
+\section{目的と検証タスクの選定}
 
 \subsection{本論文の目的}
 
@@ -138,21 +173,41 @@
 提案する「分析主導型」アプローチの有効性を実証するため，本論文では物理的相互作用の特性が大きく異なる以下の3つのタスクを選定した．
 これらは，料理作業における代表的な物理対象（流体・固形食材・道具）を含み，さらに状態変化（不可逆変形・破壊）と接触/環境制約を主要な観点としてカバーするように設計した．
 
+% \begin{table}[htbp]
+%   \centering
+%   \caption{検証タスクと適用される分析手法の対応}
+%   \label{tab:tasks}
+%   \begin{tabular}{@{}cccc@{}}
+%     \toprule
+%     検証タスク & 1. 幾何学的な分析 & 2. 力学的な分析 & 3. 環境的な分析 \\
+%     \midrule
+%     \textbf{第一研究：皮むき} &  法線・軌道 & 実行中接触圧維持 & ------ \\
+%     \addlinespace
+%     \textbf{第二研究：注ぐ} &  容積・形状 & ------ &  容器間関係 \\
+%     \addlinespace
+%     \textbf{第三研究：安定把持} &  把持点探索 &  力学解析 &  道具拘束 \\
+%     \bottomrule
+%   \end{tabular}
+% \end{table}
 \begin{table}[htbp]
   \centering
-  \caption{検証タスクと適用される分析手法の対応}
+  \caption{Correspondence between validation tasks and applied types of analysis}
   \label{tab:tasks}
-  \begin{tabular}{@{}cccc@{}}
+  
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \renewcommand{\arraystretch}{0.95}
+  \begin{tabularx}{.95\textwidth}{@{}cccc@{}}
     \toprule
-    検証タスク & 1. 幾何学的な分析 & 2. 力学的な分析 & 3. 環境的な分析 \\
+    Validation Task & 1. Geometric Analysis & 2. Mechanics-Based Analysis & 3. Environmental Analysis \\
     \midrule
-    \textbf{第一研究：皮むき} &  法線・軌道 & 実行中接触圧維持 & ------ \\
+    \textbf{1st: Peeling} & Surface Normals and Trajectory & Contact Pressure Maintenance & ------ \\
     \addlinespace
-    \textbf{第二研究：注ぐ} &  容積・形状 & ------ &  容器間関係 \\
+    \textbf{2nd: Pouring} & Volume and Shape & ------ & Inter-Container Relationship \\
     \addlinespace
-    \textbf{第三研究：安定把持} &  把持点探索 &  力学解析 &  道具拘束 \\
+    \textbf{3rd: Holding} & Holding Point Search & Mechanics-Based Evaluation & Tool Constraints \\
     \bottomrule
-  \end{tabular}
+  \end{tabularx}
 \end{table}
 
 \begin{enumerate}
