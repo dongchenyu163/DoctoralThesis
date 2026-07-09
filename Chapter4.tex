@@ -405,11 +405,11 @@ $P_L$ 上の点を実行順に $\mathbf{p}_1, \mathbf{p}_2, \ldots, \mathbf{p}_N
 ここで，$a$ は力誤差 $f_e$ に対する感度を，$b$ は誤差がゼロ付近にある場合のデッドゾーン幅を表すパラメータである．
 \begin{figure}[!t]
   \centering
-  \includegraphics[width=0.75\linewidth]{fig/chp_peeling/chp4_force_feedback_graph.png}
+  \includegraphics[width=0.75\linewidth]{fig/chp_peeling/vz_fz.eps}
   \caption{The graph of force feedback equation \ref{eq:peeling_vz}}
   \label{fig:peeling_force_feedback_graph}
 \end{figure}
-図\ref{fig:peeling_force_feedback_graph}式(\ref{eq:peeling_vz})の関数形は，基本的に $v_z$ と $f_e$ の間に線形に近い関係を持たせつつ，$f_e \approx 0$ 付近で不感帯を形成するように設計されている．
+図\ref{fig:peeling_force_feedback_graph}で示したように，式(\ref{eq:peeling_vz})の関数の形は，基本的に $v_z$ と $f_e$ の間に線形に近い関係を持たせつつ，$f_e \approx 0$ 付近で不感帯を形成するように設計されている．
 この不感帯により，微小な力計測ノイズに対する敏感な速度変動が抑制される．
 
 \subsubsection{最低速度の設定}

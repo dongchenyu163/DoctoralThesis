@@ -170,7 +170,7 @@ E_{\mathrm{tbl}} = \min(p_{1z},\ldots,p_{nz})
 \end{equation}
 本実験では出力比率$r=0.6$とした．なお，本フィルタでは指先が食材に接触した状態における拘束のみを考慮し，非接触状態から接触に至る指先の移動経路における衝突については考量しない．
 
-\begin{algorithm}[H]
+\begin{algorithm}[!t]
 \caption{Reduce the search space}
 \label{algo:holding_filter_geo}
 \begin{algorithmic}[1]
@@ -235,7 +235,7 @@ E_{\mathrm{pdis}} = -\min(\mathrm{Dist}(\equholdingpointset, \hat{\bm{n}}_{\math
     \label{equ:holding_score_pos_final}
 \end{equation}
 
-\begin{algorithm}[H]
+\begin{algorithm}[!t]
 \caption{Calculate the positional score}
 \label{algo:holding_score_pos}
 \begin{algorithmic}[1]
@@ -383,7 +383,7 @@ S_{\mathrm{dyn},i} = w_{\mathrm{mag}} \tilde{E}_{\mathrm{mag,}i} + w_{\mathrm{di
 \end{equation}
 本実験では，重みを$w_{\mathrm{dir}}=2,\ w_{\mathrm{mag}}=2,\ w_{\mathrm{var}}=1$と設定した．
 
-\begin{algorithm}[H]
+\begin{algorithm}[!t]
 \caption{Algo of the holding score calculation}
 \label{algo:holding_filter_force}
 \begin{algorithmic}[1]
